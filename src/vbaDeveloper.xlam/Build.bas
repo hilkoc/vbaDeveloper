@@ -46,9 +46,22 @@ Sub ImportCodeModules()
 
 End Sub
 
-' 
-' 
-' also need to add M VBA Extensibility 5.3
+'''
+' First time instructions:
+' 1. Open VB editor (Alt+F11)  and from the menu File->Import, import these files:
+'     * src/vbaDeveloper.xlam/Build.bas
+'     * src/vbaDeveloper.xlam/CExcelEvents.cls
+' 2. From tools references add
+'     * Microsoft Visual Basic for Applications Extensibility 5.3
+'     * Microsoft Scripting Runtime
+' 3. Rename the project to 'vbaDeveloper'
+' 4. Save as vbaDeveloper.xlam in the same directory as 'src'
+' 5. Enable programatic access to VBA:
+'       File -> Options -> Trust Center, Trust Center Settings, -> Macros,
+'       tick the box: 'Enable programatic access to VBA'
+' 6. Let vbaDeveloper import its own code. Put the cursor in the function 'testImport' and press F5.
+
+
 
 ' Usually called after the given workbook is saved
 Public Sub exportVbaCode(vbaProject As VBProject)
