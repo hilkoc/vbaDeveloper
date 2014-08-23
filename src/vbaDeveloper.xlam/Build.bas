@@ -1,67 +1,42 @@
 Attribute VB_Name = "Build"
-Option Explicit
-
-Sub ExportCodeModules()
-
-    'This code Exports all VBA modules
-    Dim componentIndex
-    Dim comName
-    'TODO lookup the current path and use naming convention for the export dir
-    
-    Dim sExportPath As String
-    'sExportPath = fso.GetParentFolderName(proj_filename) & "\src"
-    sExportPath = ThisWorkbook.Path & "\src\" '"C:\dev\local\ExcelBuild\src\"
-    Dim fso As New Scripting.FileSystemObject
-    If Not fso.FolderExists(sExportPath) Then
-        fso.CreateFolder sExportPath
-    End If
-    
-    With ThisWorkbook.VBProject
-        For componentIndex = 1 To .VBComponents.Count
-            If .VBComponents(componentIndex).CodeModule.CountOfLines > 0 Then
-                comName = .VBComponents(componentIndex).CodeModule.name
-                .VBComponents(componentIndex).Export sExportPath & comName & ".vba"
-            End If
-        Next componentIndex
-    End With
-
-End Sub
-
-Sub ImportCodeModules()
-    Dim componentIndex As Integer
-    Dim ModuleName As String
-    With ThisWorkbook.VBProject
-        For componentIndex = 1 To .VBComponents.Count
-    
-            ModuleName = .VBComponents(componentIndex).CodeModule.name
-    
-            If ModuleName <> "Build" Then
-                If Right(ModuleName, 6) = "Macros" Then
-                    .VBComponents.Remove .VBComponents(ModuleName)
-                    .VBComponents.Import "X:\Data\MySheet\" & ModuleName & ".vba"
-               End If
-            End If
-        Next componentIndex
-    End With
-
-End Sub
-
 '''
-' First time instructions:
-' 1. Open VB editor (Alt+F11)  and from the menu File->Import, import these files:
+' Build instructions:
+' 1. Open a new workbook in excel, then open the VB editor (Alt+F11)  and from the menu File->Import, import these files:
 '     * src/vbaDeveloper.xlam/Build.bas
-'     * src/vbaDeveloper.xlam/CExcelEvents.cls
-' 2. From tools references add
+' 2. From tools references... add
 '     * Microsoft Visual Basic for Applications Extensibility 5.3
 '     * Microsoft Scripting Runtime
 ' 3. Rename the project to 'vbaDeveloper'
-' 4. Save as vbaDeveloper.xlam in the same directory as 'src'
 ' 5. Enable programatic access to VBA:
 '       File -> Options -> Trust Center, Trust Center Settings, -> Macros,
 '       tick the box: 'Enable programatic access to VBA'
-' 6. Let vbaDeveloper import its own code. Put the cursor in the function 'testImport' and press F5.
+' 6. In VB Editor, press F4, then under Microsfoft Excel Objects, select ThisWorkbook.Set the property 'IsAddin' to TRUE
+' 7. In VB Editor, menu File-->Save Book1; Save as vbaDeveloper.xlam in the same directory as 'src'
+' 8. Close excel. Open excel with a new workbook, then open the just saved vbaDeveloper.xlam
+' 9. Let vbaDeveloper import its own code. Put the cursor in the function 'testImport' and press F5
+' 10.If necessary rename module 'Build1' to Build. Menu File-->Save vbaDeveloper.xlam
+'''
 
 
+
+Public Sub testImport()
+    Dim proj_name As String
+    proj_name = "vbaDeveloper"
+    
+    Dim vbaProject As Object
+    Set vbaProject = Application.VBE.VBProjects(proj_name)
+    Build.importVbaCode vbaProject
+End Sub
+
+
+Public Sub testExport()
+    Dim proj_name As String
+    proj_name = "vbaDeveloper"
+
+    Dim vbaProject As Object
+    Set vbaProject = Application.VBE.VBProjects(proj_name)
+    Build.exportVbaCode vbaProject
+End Sub
 
 ' Usually called after the given workbook is saved
 Public Sub exportVbaCode(vbaProject As VBProject)
@@ -83,20 +58,20 @@ Public Sub exportVbaCode(vbaProject As VBProject)
     
     If Not fso.FolderExists(proj_root) Then
         fso.CreateFolder proj_root
-        debugPrint "Created Folder " & proj_root
+        Debug.Print "Created Folder " & proj_root
     End If
     If Not fso.FolderExists(export_path) Then
         fso.CreateFolder export_path
-        debugPrint "Created Folder " & export_path
+        Debug.Print "Created Folder " & export_path
     End If
     
-    debugPrint "exporting to " & export_path
+    Debug.Print "exporting to " & export_path
     'export all components
     Dim component As VBComponent
     For Each component In vbaProject.VBComponents
         'lblStatus.Caption = "Exporting " & proj_name & "::" & component.Name
         If hasCodeToExport(component) Then
-            'DebugPrint "exporting type is " & component.Type
+            'Debug.Print "exporting type is " & component.Type
             Select Case component.Type
                 Case vbext_ct_ClassModule
                     exportComponent export_path, component
@@ -118,14 +93,14 @@ Private Function hasCodeToExport(component As VBComponent) As Boolean
     If component.CodeModule.CountOfLines <= 2 Then
         Dim firstLine As String
         firstLine = Trim(component.CodeModule.Lines(1, 1))
-        'DebugPrint firstLine
+        'Debug.Print firstLine
         hasCodeToExport = Not (firstLine = "" Or firstLine = "Option Explicit")
     End If
 End Function
 
 'To export everything else but sheets
 Private Sub exportComponent(exportPath As String, component As VBComponent, Optional extension As String = ".cls")
-    debugPrint "exporting " & component.name & extension
+    Debug.Print "exporting " & component.name & extension
     component.Export exportPath & "\" & component.name & extension
 End Sub
 
@@ -134,7 +109,7 @@ Private Sub exportLines(exportPath As String, component As VBComponent)
     Dim extension As String: extension = ".sheet.cls"
     Dim fileName As String
     fileName = exportPath & "\" & component.name & extension
-    debugPrint "exporting " & component.name & extension
+    Debug.Print "exporting " & component.name & extension
     'component.Export exportPath & "\" & component.name & extension
     Dim fso As New Scripting.FileSystemObject
     Dim outStream As TextStream
@@ -150,7 +125,7 @@ Public Sub importVbaCode(vbaProject As VBProject)
     vbProjectFileName = vbaProject.fileName
     If vbProjectFileName = "" Then
         'In this case it is a new workbook, we skip it
-        debugPrint "No file name for project " & vbaProject.name & ", skipping"
+        Debug.Print "No file name for project " & vbaProject.name & ", skipping"
         Exit Sub
     End If
     
@@ -164,11 +139,11 @@ Public Sub importVbaCode(vbaProject As VBProject)
     export_path = proj_root & fso.GetFileName(vbProjectFileName)
     
     If Not fso.FolderExists(proj_root) Then
-        debugPrint "Could not find folder " & proj_root
+        Debug.Print "Could not find folder " & proj_root
         Exit Sub
     End If
     If Not fso.FolderExists(export_path) Then
-        debugPrint "Could not find folder " & export_path
+        Debug.Print "Could not find folder " & export_path
         Exit Sub
     End If
     
@@ -200,13 +175,13 @@ Public Sub importVbaCode(vbaProject As VBProject)
                        importComponent vbaProject, file
                     Case Else
                         'do nothing
-                        debugPrint "Skipping file " & fileName
+                        Debug.Print "Skipping file " & fileName
                 End Select
             End If
         Next
     End If
 
-    debugPrint "imported code for " & vbaProject.name
+    Debug.Print "imported code for " & vbaProject.name
 End Sub
 
 'Not used anymore
@@ -239,10 +214,10 @@ Private Sub importComponent(vbaProject As VBProject, file As Object)
         'Remove it. (Sheets cannot be removed!)
         Dim c As VBComponent
         Set c = vbaProject.VBComponents(component_name)
-        debugPrint "removing " & component_name & "  " & c.name
+        Debug.Print "removing " & component_name & "  " & c.name
         vbaProject.VBComponents.Remove c
     End If
-    debugPrint "Importing component " & component_name & " from  " & file.Path
+    Debug.Print "Importing component " & component_name & " from  " & file.Path
     ' If we get duplicate modules, like MyClass1, try
     ' Application.OnTime (Now + TimeValue("00:00:01")), "function_name" vbaProject.VBComponents.Import file.Path
     vbaProject.VBComponents.Import file.Path
@@ -259,7 +234,7 @@ Private Sub importLines(vbaProject As VBProject, file As Object)
     End If
     Dim c As VBComponent
     Set c = vbaProject.VBComponents(component_name)
-    debugPrint "Importing lines from " & component_name & " into component " & c.name
+    Debug.Print "Importing lines from " & component_name & " into component " & c.name
     c.CodeModule.DeleteLines 1, c.CodeModule.CountOfLines
     c.CodeModule.AddFromFile file.Path
 End Sub

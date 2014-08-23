@@ -9,7 +9,10 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
 
-' Interface class with hooks for thisWorkbook open and close actions
+' Interface with hooks for thisWorkbook open and close actions
+'
+' An implementation can for example open a number of workbooks, connect to a database, load data and initialize worksheets,
+' or any other tasks that otherwise have to be done manually.
 
 'Called after thisWorkbook is opened
 Sub afterOpen()

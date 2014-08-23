@@ -10,34 +10,21 @@ Attribute VB_Exposed = False
 Option Explicit
 
 Implements CustomActions
+' This class serves as an example only.
 
-Private Const ROOT_FXS_PATH As String = "C:\dev\fx_spreadsheets\trunk\Pricing Tools\Loader\"
-Private Const LOADER_NAME As String = "loader.xla"
 
-Private Const gridAddin As String = "CFXGrid.xla"
-Private Const gridUsername As String = "FoxGrid_FID"
-Private Const gridPassword As String = "ha86dk3r"
-Private Const gridGrid As String = "LNDEV"
-Private Const gridApp As String = "WIN_CFX_3.27_patchVolVolCorrCurve"
-
-Private Const foxAddin As String = "CFXDatabase.xla"
-Private Const foxUsername As String = "hc15196"
-Private Const foxPassword As String = "*******"
+Private Const MY_FAVORITE_WORKBOOK_PATH As String = "C:\path\to\myFavoriteWorkbook\"
+Private Const MY_FAVORITE_WORKBOOK_NAME As String = "example.xlsm"
 
 
 ' Doc: See CustomActions
 Private Sub CustomActions_afterOpen()
 On Error GoTo CustomActions_afterOpen_Error
     
-    If IsWorkBookOpen(LOADER_NAME) Then
-        'connect to fox and to grid
-        debugPrint "loader is open, connecting to fox and to grid"
-        
-        Application.Run gridAddin & "!modGrid.ConnectToGrid", gridUsername, gridPassword, gridGrid, gridApp
-        
-        Application.Run foxAddin & "!modAPI.FoxLogin", foxUsername, foxPassword 'connect to default server
+    If Not IsWorkBookOpen(MY_FAVORITE_WORKBOOK_NAME) Then
+        ' The next line usually raises an error, therefore it is commented out.
+        'Application.Workbooks.Open (MY_FAVORITE_WORKBOOK_PATH & MY_FAVORITE_WORKBOOK_NAME)
     End If
-    'Workbooks.Open ROOT_FXS_PATH & LOADER_NAME
     
    On Error GoTo 0
    Exit Sub

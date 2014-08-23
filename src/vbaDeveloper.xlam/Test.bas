@@ -11,9 +11,7 @@ End Sub
 
 Public Sub testImport()
     Dim proj_name As String
-    'proj_name = "vbaDeveloper"
-    proj_name = "CCCvbaDeveloper"
-    'proj_name = "testBuildAddin"
+    proj_name = "vbaDeveloper"
     
     Dim vbaProject As Object
     Set vbaProject = Application.VBE.VBProjects(proj_name)
@@ -24,21 +22,8 @@ End Sub
 Public Sub testExport()
     Dim proj_name As String
     proj_name = "vbaDeveloper"
-    'proj_name = "CCCvbaDeveloper"
-    'proj_name = "testBuildAddin"
 
     Dim vbaProject As Object
     Set vbaProject = Application.VBE.VBProjects(proj_name)
     Build.exportVbaCode vbaProject
 End Sub
-
-'    Dim pr As Object
-'    For Each pr In Application.VBE.VBProjects
-'        DebugPrint pr.name
-'    Next pr
-
-'    Dim wkb As Workbook
-'    For Each wkb In Application.Workbooks
-'        wbName = wkb.Name
-'        DebugPrint wbName
-'    Next wkb
