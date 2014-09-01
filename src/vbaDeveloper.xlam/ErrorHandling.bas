@@ -12,11 +12,7 @@ End Sub
 Public Sub handleError(Optional errLocation As String = "")
     Dim errorMessage As String
     errorMessage = "Error in " & errLocation & ", [" & Err.Source & "] : error number " & Err.Number & vbNewLine & Err.Description
-    debugPrint errorMessage
+    Debug.Print errorMessage
     MsgBox errorMessage, vbCritical, "vbaDeveloper ErrorHandler"
 End Sub
 
-
-Public Sub debugPrint(message As String)
-    Debug.Print message
-End Sub

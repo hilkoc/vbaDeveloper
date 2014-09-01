@@ -17,7 +17,7 @@ Attribute VB_Name = "Build"
 ' 10.If necessary rename module 'Build1' to Build. Menu File-->Save vbaDeveloper.xlam
 '''
 
-
+Option Explicit
 
 Public Sub testImport()
     Dim proj_name As String

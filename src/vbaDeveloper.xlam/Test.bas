@@ -8,7 +8,6 @@ Public Sub testMyCustomActions_Open()
 End Sub
 
 
-
 Public Sub testImport()
     Dim proj_name As String
     proj_name = "vbaDeveloper"

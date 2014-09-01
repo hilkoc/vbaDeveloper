@@ -1,20 +1,22 @@
-Private eventListener As CExcelEvents
+Option Explicit
+
+Private listener As EventListener
 Private customAction As CustomActions
 
 ' Initialize member to listen to excel events
 Private Sub Workbook_Open()
-    debugPrint "vbaDeveloper thisWorkbook_open()"
-    Set eventListener = New CExcelEvents
+    Debug.Print "vbaDeveloper thisWorkbook_open()"
+    Set listener = New EventListener
     Set customAction = New MyCustomActions
     customAction.afterOpen
 End Sub
 
 ' Clean up our private members
 Private Sub Workbook_BeforeClose(Cancel As Boolean)
-    debugPrint "vbaDeveloper thisWorkbook_BeforeClose()"
+    Debug.Print "vbaDeveloper thisWorkbook_BeforeClose()"
     customAction.beforeClose
     Set customAction = Nothing
-    Set eventListener = Nothing
+    Set listener = Nothing
 End Sub
 
     
