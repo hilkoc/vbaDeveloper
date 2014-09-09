@@ -19,6 +19,11 @@ Attribute VB_Name = "Build"
 
 Option Explicit
 
+Private Const IMPORT_DELAY As String = "00:00:03"
+
+Private componentsToImport As Dictionary 'Key = componentName, Value = componentFilePath
+Private vbaProjectToImport As VBProject
+
 Public Sub testImport()
     Dim proj_name As String
     proj_name = "vbaDeveloper"
@@ -37,6 +42,8 @@ Public Sub testExport()
     Set vbaProject = Application.VBE.VBProjects(proj_name)
     Build.exportVbaCode vbaProject
 End Sub
+
+
 
 ' Usually called after the given workbook is saved
 Public Sub exportVbaCode(vbaProject As VBProject)
@@ -88,6 +95,7 @@ Public Sub exportVbaCode(vbaProject As VBProject)
     Next component
 End Sub
 
+
 Private Function hasCodeToExport(component As VBComponent) As Boolean
     hasCodeToExport = True
     If component.CodeModule.CountOfLines <= 2 Then
@@ -98,11 +106,13 @@ Private Function hasCodeToExport(component As VBComponent) As Boolean
     End If
 End Function
 
+
 'To export everything else but sheets
 Private Sub exportComponent(exportPath As String, component As VBComponent, Optional extension As String = ".cls")
     Debug.Print "exporting " & component.name & extension
     component.Export exportPath & "\" & component.name & extension
 End Sub
+
 
 'To export sheets
 Private Sub exportLines(exportPath As String, component As VBComponent)
@@ -117,6 +127,7 @@ Private Sub exportLines(exportPath As String, component As VBComponent)
     outStream.Write (component.CodeModule.Lines(1, component.CodeModule.CountOfLines))
     outStream.Close
 End Sub
+
 
 ' Usually called after the given workbook is opened
 Public Sub importVbaCode(vbaProject As VBProject)
@@ -147,87 +158,99 @@ Public Sub importVbaCode(vbaProject As VBProject)
         Exit Sub
     End If
     
-    'for each file found:
-    If fso.FolderExists(export_path) Then
-        Dim proj_contents As Folder
-        Set proj_contents = fso.GetFolder(export_path)
-        
-        Dim file As Object
-        For Each file In proj_contents.Files()
-            
-            Dim fileName As String
-            fileName = file.name
-            'check if and how to import the file
-            If Len(fileName) > 4 Then
-                Dim lastPart As String
-                lastPart = Right(fileName, 4)
-                Select Case lastPart
-                    Case ".cls" ' 10 == Len(".sheet.cls")
-                        If Len(fileName) > 10 And Right(fileName, 10) = ".sheet.cls" Then
-                            'import lines into sheet
-                            importLines vbaProject, file
-                        Else
-                            'import component
-                            importComponent vbaProject, file
-                        End If
-                    Case ".bas", ".frm"
-                       'import component
-                       importComponent vbaProject, file
-                    Case Else
-                        'do nothing
-                        Debug.Print "Skipping file " & fileName
-                End Select
-            End If
-        Next
-    End If
-
-    Debug.Print "imported code for " & vbaProject.name
+    'initialize globals for Application.OnTime
+    Set componentsToImport = New Dictionary
+    Set vbaProjectToImport = vbaProject
+    
+    Dim projContents As Folder
+    Set projContents = fso.GetFolder(export_path)
+    Dim file As Object
+    For Each file In projContents.Files()
+        'check if and how to import the file
+        checkHowToImport file
+    Next
+    
+    
+    'First remove all the files
+    Dim componentName As String
+    Dim vComponentName As Variant
+    For Each vComponentName In componentsToImport.Keys
+        componentName = vComponentName
+        removeComponent vbaProject, componentName
+    Next
+    'Then import them
+    Debug.Print "Invoking Application.Ontime with delay " & IMPORT_DELAY    ' To prevent duplicate modules, like MyClass1 etc.
+    Application.OnTime Now() + TimeValue(IMPORT_DELAY), "'Build.importComponents'"
+    Debug.Print "Waiting to import code for " & vbaProject.name
 End Sub
 
-'Not used anymore
-Private Function wantToImport(fileName As String) As Boolean
-    wantToImport = False
+Private Sub checkHowToImport(file As Object)
+    Dim fileName As String
+    fileName = file.name
+    Dim componentName As String
+    componentName = Left(fileName, InStr(fileName, ".") - 1)
+    If componentName = "Build" Then '"don't remove or import ourself
+        Exit Sub
+    End If
+    
     If Len(fileName) > 4 Then
         Dim lastPart As String
         lastPart = Right(fileName, 4)
         Select Case lastPart
-            Case ".bas", ".frm"
-               wantToImport = True
             Case ".cls" ' 10 == Len(".sheet.cls")
                 If Len(fileName) > 10 And Right(fileName, 10) = ".sheet.cls" Then
-                    wantToImport = False 'For now we don't import these
+                    'import lines into sheet
+                    'TODO importLines vbaProject, file
                 Else
-                    wantToImport = True
+                    'importComponent vbaProject, file
+                    componentsToImport.Add componentName, file.Path
                 End If
+            Case ".bas", ".frm"
+               'importComponent vbaProject, file
+                componentsToImport.Add componentName, file.Path
             Case Else
-                wantToImport = False
+                'do nothing
+                Debug.Print "Skipping file " & fileName
         End Select
     End If
-End Function
+End Sub
 
-
-Private Sub importComponent(vbaProject As VBProject, file As Object)
-    Dim component_name As String
-    component_name = Left(file.name, InStr(file.name, ".") - 1)
-    
-    If component_exists(vbaProject, component_name) Then
-        'Remove it. (Sheets cannot be removed!)
+' Only removes the vba component if it exists
+Private Sub removeComponent(vbaProject As VBProject, componentName As String)
+    If componentExists(vbaProject, componentName) Then
         Dim c As VBComponent
-        Set c = vbaProject.VBComponents(component_name)
-        Debug.Print "removing " & component_name & "  " & c.name
+        Set c = vbaProject.VBComponents(componentName)
+        Debug.Print "removing " & c.name
         vbaProject.VBComponents.Remove c
     End If
-    Debug.Print "Importing component " & component_name & " from  " & file.Path
-    ' If we get duplicate modules, like MyClass1, try
-    ' Application.OnTime (Now + TimeValue("00:00:01")), "function_name" vbaProject.VBComponents.Import file.Path
-    vbaProject.VBComponents.Import file.Path
 End Sub
+
+Public Sub importComponents()
+    Dim componentName As String
+    Dim vComponentName As Variant
+    For Each vComponentName In componentsToImport.Keys
+        componentName = vComponentName
+        importComponent vbaProjectToImport, componentsToImport(componentName)
+    Next
+    Debug.Print "Finished importing code for " & vbaProjectToImport.name
+    'We're done, clear globals explicitly to free memory
+    Set componentsToImport = Nothing
+    Set vbaProjectToImport = Nothing
+End Sub
+
+
+' Assumes any component with same name has already been removed
+Private Sub importComponent(vbaProject As VBProject, filePath As String)
+    Debug.Print "Importing component from  " & filePath
+    vbaProject.VBComponents.Import filePath
+End Sub
+
 
 Private Sub importLines(vbaProject As VBProject, file As Object)
     Dim component_name As String
     component_name = Left(file.name, InStr(file.name, ".") - 1)
                 
-    If Not component_exists(vbaProject, component_name) Then
+    If Not componentExists(vbaProject, component_name) Then
         'Create a sheet and component to import this into
         '...skipping that for now
         Exit Sub
@@ -239,23 +262,14 @@ Private Sub importLines(vbaProject As VBProject, file As Object)
     c.CodeModule.AddFromFile file.Path
 End Sub
 
-Private Function component_exists(ByRef proj As VBProject, name As String) As Boolean
+
+Public Function componentExists(ByRef proj As VBProject, name As String) As Boolean
     On Error GoTo doesnt
     
     Dim c As VBComponent
     Set c = proj.VBComponents(name)
-    
-    component_exists = True
+    componentExists = True
     Exit Function
 doesnt:
-    component_exists = False
+    componentExists = False
 End Function
-
-
-
-''''''''''''''''''
-
-Public Function Hello() As String
-    Hello = "hello it works"
-End Function
-
