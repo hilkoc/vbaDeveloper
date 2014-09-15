@@ -21,6 +21,7 @@ Option Explicit
 
 Private Const IMPORT_DELAY As String = "00:00:03"
 
+'We need to make these variables public such that they can be read by application.ontime
 Private componentsToImport As Dictionary 'Key = componentName, Value = componentFilePath
 Private vbaProjectToImport As VBProject
 
@@ -133,13 +134,15 @@ End Sub
 Public Sub importVbaCode(vbaProject As VBProject)
     'find project files
     Dim vbProjectFileName As String
-    vbProjectFileName = vbaProject.fileName
+    On Error Resume Next
+        'this can throw if the workbook has never been saved.
+        vbProjectFileName = vbaProject.fileName
+    On Error GoTo 0
     If vbProjectFileName = "" Then
         'In this case it is a new workbook, we skip it
         Debug.Print "No file name for project " & vbaProject.name & ", skipping"
         Exit Sub
     End If
-    
     
     Dim fso As New Scripting.FileSystemObject
     Dim projDir As String
@@ -181,7 +184,7 @@ Public Sub importVbaCode(vbaProject As VBProject)
     'Then import them
     Debug.Print "Invoking Application.Ontime with delay " & IMPORT_DELAY    ' To prevent duplicate modules, like MyClass1 etc.
     Application.OnTime Now() + TimeValue(IMPORT_DELAY), "'Build.importComponents'"
-    Debug.Print "Waiting to import code for " & vbaProject.name
+    Debug.Print "imported code for " & vbaProject.name
 End Sub
 
 Private Sub checkHowToImport(file As Object)
@@ -200,7 +203,7 @@ Private Sub checkHowToImport(file As Object)
             Case ".cls" ' 10 == Len(".sheet.cls")
                 If Len(fileName) > 10 And Right(fileName, 10) = ".sheet.cls" Then
                     'import lines into sheet
-                    'TODO importLines vbaProject, file
+                    importLines vbaProjectToImport, file
                 Else
                     'importComponent vbaProject, file
                     componentsToImport.Add componentName, file.Path
@@ -238,7 +241,6 @@ Public Sub importComponents()
     Set vbaProjectToImport = Nothing
 End Sub
 
-
 ' Assumes any component with same name has already been removed
 Private Sub importComponent(vbaProject As VBProject, filePath As String)
     Debug.Print "Importing component from  " & filePath
@@ -247,17 +249,19 @@ End Sub
 
 
 Private Sub importLines(vbaProject As VBProject, file As Object)
-    Dim component_name As String
-    component_name = Left(file.name, InStr(file.name, ".") - 1)
-                
-    If Not componentExists(vbaProject, component_name) Then
-        'Create a sheet and component to import this into
-        '...skipping that for now
-        Exit Sub
-    End If
+    Dim componentName As String
+    componentName = Left(file.name, InStr(file.name, ".") - 1)
     Dim c As VBComponent
-    Set c = vbaProject.VBComponents(component_name)
-    Debug.Print "Importing lines from " & component_name & " into component " & c.name
+    If Not componentExists(vbaProject, componentName) Then
+        'Create a sheet to import this code into. We cannot set the ws.codeName property which is read-only,
+        ' instead we set its vbComponent.name which leads to the same result.
+        Dim addedSheetCodeName As String
+        addedSheetCodeName = addSheetToWorkbook(componentName, vbaProject.fileName)
+        Set c = vbaProject.VBComponents(addedSheetCodeName)
+        c.name = componentName
+    End If
+    Set c = vbaProject.VBComponents(componentName)
+    Debug.Print "Importing lines from " & componentName & " into component " & c.name
     c.CodeModule.DeleteLines 1, c.CodeModule.CountOfLines
     c.CodeModule.AddFromFile file.Path
 End Sub
@@ -265,11 +269,45 @@ End Sub
 
 Public Function componentExists(ByRef proj As VBProject, name As String) As Boolean
     On Error GoTo doesnt
-    
     Dim c As VBComponent
     Set c = proj.VBComponents(name)
     componentExists = True
     Exit Function
 doesnt:
     componentExists = False
+End Function
+
+
+' Returns a reference to the workbook. Opens it if it is not already opened.
+' Raises error if the file cannot be found.
+Public Function openWorkbook(ByVal filePath As String) As Workbook
+    Dim wb As Workbook
+    Dim fileName As String
+    fileName = Dir(filePath)
+    On Error Resume Next
+        Set wb = Workbooks(fileName)
+    On Error GoTo 0
+    If wb Is Nothing Then
+        Set wb = Workbooks.Open(filePath) 'can raise error
+    End If
+    Set openWorkbook = wb
+End Function
+
+' Returns the CodeName of the added sheet or an empty String if the workbook could not be opened.
+Public Function addSheetToWorkbook(sheetName As String, workbookFilePath As String) As String
+    Dim wb As Workbook
+    On Error Resume Next 'can throw if given path does not exist
+        Set wb = openWorkbook(workbookFilePath)
+    On Error GoTo 0
+    If Not wb Is Nothing Then
+        Dim ws As Worksheet
+        Set ws = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count))
+        ws.name = sheetName
+        'ws.CodeName = sheetName: cannot assign to read only property
+        Debug.Print "Sheet added " & sheetName
+        addSheetToWorkbook = ws.CodeName
+    Else
+        Debug.Print "Skipping file " & sheetName & ". Could not open workbook " & workbookFilePath
+        addSheetToWorkbook = ""
+    End If
 End Function
