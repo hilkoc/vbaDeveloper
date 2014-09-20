@@ -22,8 +22,9 @@ Option Explicit
 Private Const IMPORT_DELAY As String = "00:00:03"
 
 'We need to make these variables public such that they can be read by application.ontime
-Private componentsToImport As Dictionary 'Key = componentName, Value = componentFilePath
-Private vbaProjectToImport As VBProject
+Public componentsToImport As Dictionary 'Key = componentName, Value = componentFilePath
+Public sheetsToImport As Dictionary 'Key = componentName, Value = File object
+Public vbaProjectToImport As VBProject
 
 Public Sub testImport()
     Dim proj_name As String
@@ -163,6 +164,7 @@ Public Sub importVbaCode(vbaProject As VBProject)
     
     'initialize globals for Application.OnTime
     Set componentsToImport = New Dictionary
+    Set sheetsToImport = New Dictionary
     Set vbaProjectToImport = vbaProject
     
     Dim projContents As Folder
@@ -173,18 +175,18 @@ Public Sub importVbaCode(vbaProject As VBProject)
         checkHowToImport file
     Next
     
-    
-    'First remove all the files
     Dim componentName As String
     Dim vComponentName As Variant
+    'Remove all the modules and class modules
     For Each vComponentName In componentsToImport.Keys
         componentName = vComponentName
         removeComponent vbaProject, componentName
     Next
     'Then import them
-    Debug.Print "Invoking Application.Ontime with delay " & IMPORT_DELAY    ' To prevent duplicate modules, like MyClass1 etc.
+    Debug.Print "Invoking 'Build.importComponents'with Application.Ontime with delay " & IMPORT_DELAY
+    ' to prevent duplicate modules, like MyClass1 etc.
     Application.OnTime Now() + TimeValue(IMPORT_DELAY), "'Build.importComponents'"
-    Debug.Print "imported code for " & vbaProject.name
+    Debug.Print "almost finished importing code for " & vbaProject.name
 End Sub
 
 Private Sub checkHowToImport(file As Object)
@@ -202,8 +204,8 @@ Private Sub checkHowToImport(file As Object)
         Select Case lastPart
             Case ".cls" ' 10 == Len(".sheet.cls")
                 If Len(fileName) > 10 And Right(fileName, 10) = ".sheet.cls" Then
-                    'import lines into sheet
-                    importLines vbaProjectToImport, file
+                    'import lines into sheet: importLines vbaProjectToImport, file
+                    sheetsToImport.Add componentName, file
                 Else
                     'importComponent vbaProject, file
                     componentsToImport.Add componentName, file.Path
@@ -229,12 +231,23 @@ Private Sub removeComponent(vbaProject As VBProject, componentName As String)
 End Sub
 
 Public Sub importComponents()
+    If componentsToImport Is Nothing Then
+        Debug.Print "Failed to import! 'Dictionary 'componentsToImport' was not initialized."
+        Exit Sub
+    End If
     Dim componentName As String
     Dim vComponentName As Variant
     For Each vComponentName In componentsToImport.Keys
         componentName = vComponentName
         importComponent vbaProjectToImport, componentsToImport(componentName)
     Next
+    
+    'Import the sheets
+    For Each vComponentName In sheetsToImport.Keys
+        componentName = vComponentName
+        importLines vbaProjectToImport, sheetsToImport(componentName)
+    Next
+    
     Debug.Print "Finished importing code for " & vbaProjectToImport.name
     'We're done, clear globals explicitly to free memory
     Set componentsToImport = Nothing
@@ -262,8 +275,12 @@ Private Sub importLines(vbaProject As VBProject, file As Object)
     End If
     Set c = vbaProject.VBComponents(componentName)
     Debug.Print "Importing lines from " & componentName & " into component " & c.name
+    
+    ' At this point compilation errors may cause a crash, so we ignore those
+    On Error Resume Next
     c.CodeModule.DeleteLines 1, c.CodeModule.CountOfLines
     c.CodeModule.AddFromFile file.Path
+    On Error GoTo 0
 End Sub
 
 
