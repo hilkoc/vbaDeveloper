@@ -6,6 +6,8 @@ It will automatically export all your classes and modules to plain text, wheneve
 
 VbaDeveloper can also import the code again into your excel workbook. This is particularly useful after reverting an earlier commit or after merging branches. When you open an excel workbook it will ask if you want to import the code for that project.
 
+A code formatter for VBA is also included. It is implemented in VBA and can be directly run as a macro within the VBA Editor, so you can format your code as you write it. The most convenient way to run it is by opening the immediate window and then typing 'format'. This will format the active codepane.
+
 Building the addin
 -----------------------
 
