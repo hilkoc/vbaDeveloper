@@ -5,14 +5,14 @@ Private Const MENU_TITLE = "vbaDeveloper"
 
 Public Sub createMenu()
     Dim rootMenu As CommandBarPopup
-    
+
     'Add the top-level menu to the ribbon Add-ins section
     Set rootMenu = Application.CommandBars(1).Controls.Add(Type:=msoControlPopup, _
-                    Before:=10, _
-                    Temporary:=True)
+    Before:=10, _
+    Temporary:=True)
     rootMenu.caption = MENU_TITLE
-                
-    
+
+
     Dim exSubMenu As CommandBarPopup
     Dim imSubMenu As CommandBarPopup
     Set exSubMenu = addSubmenu(rootMenu, 1, "Export code for ...")
@@ -21,7 +21,7 @@ Public Sub createMenu()
     Dim refreshItem As CommandBarButton
     Set refreshItem = addMenuItem(rootMenu, "Menu.refreshMenu", "Refresh this menu")
     refreshItem.FaceId = 37
-    
+
     ' menuItem.FaceId = FaceId ' set a picture
     Dim vProject As Variant
     For Each vProject In Application.VBE.VBProjects
@@ -69,7 +69,7 @@ End Sub
 'This sub should be executed when the workbook is closed
 Public Sub deleteMenu()
     On Error Resume Next
-        Application.CommandBars(1).Controls(MENU_TITLE).Delete
+    Application.CommandBars(1).Controls(MENU_TITLE).Delete
     On Error GoTo 0
 End Sub
 
@@ -79,29 +79,29 @@ Public Sub refreshMenu()
 End Sub
 
 Public Sub exportVbProject(ByVal projectName As String)
-   On Error GoTo exportVbProject_Error
-   
+    On Error GoTo exportVbProject_Error
+
     Dim project As VBProject
     Set project = Application.VBE.VBProjects(projectName)
     Build.exportVbaCode project
     MsgBox "Finished exporting code for: " & project.name
 
-   On Error GoTo 0
-   Exit Sub
+    On Error GoTo 0
+    Exit Sub
 exportVbProject_Error:
     ErrorHandling.handleError "Menu.exportVbProject"
 End Sub
 
 Public Sub importVbProject(ByVal projectName As String)
-   On Error GoTo importVbProject_Error
-   
+    On Error GoTo importVbProject_Error
+
     Dim project As VBProject
     Set project = Application.VBE.VBProjects(projectName)
     Build.importVbaCode project
     MsgBox "Finished importing code for: " & project.name
 
-   On Error GoTo 0
-   Exit Sub
+    On Error GoTo 0
+    Exit Sub
 importVbProject_Error:
     ErrorHandling.handleError "Menu.importVbProject"
 End Sub

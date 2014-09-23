@@ -176,7 +176,7 @@ Sub aSubWithoutAccessModifier(that As Variant, _
     lot As Integer, _
     of As Variant, Optional _
     parameters As String = "default")
-    
+
     Dim p As Object
 somelabel:
     With p

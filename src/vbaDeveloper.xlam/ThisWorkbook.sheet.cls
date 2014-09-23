@@ -20,4 +20,3 @@ Private Sub Workbook_BeforeClose(Cancel As Boolean)
     Set customAction = Nothing
     Set listener = Nothing
 End Sub
-    

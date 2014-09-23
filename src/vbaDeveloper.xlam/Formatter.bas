@@ -125,7 +125,7 @@ Public Sub testFormatting()
     End If
     'Debug.Print Application.VBE.ActiveCodePane.codePane.Parent.Name
     'Debug.Print Application.VBE.ActiveWindow.caption
-    
+
     Dim projName As String, moduleName As String
     projName = "vbaDeveloper"
     moduleName = "Test"
@@ -141,11 +141,11 @@ End Sub
 
 Public Sub formatProject(vbaProject As VBProject)
     Dim codePane As codeModule
-    
-    Dim code As Variant
-    For Each code In vbaProject.VBComponents.Items
-        Set codePane = code
-        Debug.Print "Formatting " & codePane.Parent.name
+
+    Dim component As Variant
+    For Each component In vbaProject.VBComponents
+        Set codePane = component.codeModule
+        Debug.Print "Formatting " & component.name
         formatCode codePane
     Next
 End Sub

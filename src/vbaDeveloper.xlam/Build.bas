@@ -29,7 +29,7 @@ Public vbaProjectToImport As VBProject
 Public Sub testImport()
     Dim proj_name As String
     proj_name = "vbaDeveloper"
-    
+
     Dim vbaProject As Object
     Set vbaProject = Application.VBE.VBProjects(proj_name)
     Build.importVbaCode vbaProject
@@ -56,7 +56,7 @@ Public Sub exportVbaCode(vbaProject As VBProject)
         'In this case it is a new workbook, we skip it
         Exit Sub
     End If
-    
+
     Dim fso As New Scripting.FileSystemObject
     Dim projDir As String
     projDir = fso.GetParentFolderName(vbProjectFileName)
@@ -64,7 +64,7 @@ Public Sub exportVbaCode(vbaProject As VBProject)
     proj_root = projDir & "\src\"
     Dim export_path As String
     export_path = proj_root & fso.GetFileName(vbProjectFileName)
-    
+
     If Not fso.FolderExists(proj_root) Then
         fso.CreateFolder proj_root
         Debug.Print "Created Folder " & proj_root
@@ -73,7 +73,7 @@ Public Sub exportVbaCode(vbaProject As VBProject)
         fso.CreateFolder export_path
         Debug.Print "Created Folder " & export_path
     End If
-    
+
     Debug.Print "exporting to " & export_path
     'export all components
     Dim component As VBComponent
@@ -136,15 +136,15 @@ Public Sub importVbaCode(vbaProject As VBProject)
     'find project files
     Dim vbProjectFileName As String
     On Error Resume Next
-        'this can throw if the workbook has never been saved.
-        vbProjectFileName = vbaProject.fileName
+    'this can throw if the workbook has never been saved.
+    vbProjectFileName = vbaProject.fileName
     On Error GoTo 0
     If vbProjectFileName = "" Then
         'In this case it is a new workbook, we skip it
         Debug.Print "No file name for project " & vbaProject.name & ", skipping"
         Exit Sub
     End If
-    
+
     Dim fso As New Scripting.FileSystemObject
     Dim projDir As String
     projDir = fso.GetParentFolderName(vbProjectFileName)
@@ -152,7 +152,7 @@ Public Sub importVbaCode(vbaProject As VBProject)
     proj_root = projDir & "\src\"
     Dim export_path As String
     export_path = proj_root & fso.GetFileName(vbProjectFileName)
-    
+
     If Not fso.FolderExists(proj_root) Then
         Debug.Print "Could not find folder " & proj_root
         Exit Sub
@@ -161,12 +161,12 @@ Public Sub importVbaCode(vbaProject As VBProject)
         Debug.Print "Could not find folder " & export_path
         Exit Sub
     End If
-    
+
     'initialize globals for Application.OnTime
     Set componentsToImport = New Dictionary
     Set sheetsToImport = New Dictionary
     Set vbaProjectToImport = vbaProject
-    
+
     Dim projContents As Folder
     Set projContents = fso.GetFolder(export_path)
     Dim file As Object
@@ -174,7 +174,7 @@ Public Sub importVbaCode(vbaProject As VBProject)
         'check if and how to import the file
         checkHowToImport file
     Next
-    
+
     Dim componentName As String
     Dim vComponentName As Variant
     'Remove all the modules and class modules
@@ -197,7 +197,7 @@ Private Sub checkHowToImport(file As Object)
     If componentName = "Build" Then '"don't remove or import ourself
         Exit Sub
     End If
-    
+
     If Len(fileName) > 4 Then
         Dim lastPart As String
         lastPart = right(fileName, 4)
@@ -211,7 +211,7 @@ Private Sub checkHowToImport(file As Object)
                     componentsToImport.Add componentName, file.Path
                 End If
             Case ".bas", ".frm"
-               'importComponent vbaProject, file
+                'importComponent vbaProject, file
                 componentsToImport.Add componentName, file.Path
             Case Else
                 'do nothing
@@ -241,13 +241,13 @@ Public Sub importComponents()
         componentName = vComponentName
         importComponent vbaProjectToImport, componentsToImport(componentName)
     Next
-    
+
     'Import the sheets
     For Each vComponentName In sheetsToImport.Keys
         componentName = vComponentName
         importLines vbaProjectToImport, sheetsToImport(componentName)
     Next
-    
+
     Debug.Print "Finished importing code for " & vbaProjectToImport.name
     'We're done, clear globals explicitly to free memory
     Set componentsToImport = Nothing
@@ -275,7 +275,7 @@ Private Sub importLines(vbaProject As VBProject, file As Object)
     End If
     Set c = vbaProject.VBComponents(componentName)
     Debug.Print "Importing lines from " & componentName & " into component " & c.name
-    
+
     ' At this point compilation errors may cause a crash, so we ignore those
     On Error Resume Next
     c.codeModule.DeleteLines 1, c.codeModule.CountOfLines
@@ -302,7 +302,7 @@ Public Function openWorkbook(ByVal filePath As String) As Workbook
     Dim fileName As String
     fileName = Dir(filePath)
     On Error Resume Next
-        Set wb = Workbooks(fileName)
+    Set wb = Workbooks(fileName)
     On Error GoTo 0
     If wb Is Nothing Then
         Set wb = Workbooks.Open(filePath) 'can raise error
@@ -314,7 +314,7 @@ End Function
 Public Function addSheetToWorkbook(sheetName As String, workbookFilePath As String) As String
     Dim wb As Workbook
     On Error Resume Next 'can throw if given path does not exist
-        Set wb = openWorkbook(workbookFilePath)
+    Set wb = openWorkbook(workbookFilePath)
     On Error GoTo 0
     If Not wb Is Nothing Then
         Dim ws As Worksheet

@@ -20,8 +20,8 @@ Private Sub Class_Initialize()
 End Sub
 
 Private Sub App_WorkbookAfterSave(ByVal wb As Workbook, ByVal success As Boolean)
-   On Error GoTo App_WorkbookAfterSave_Error
-   
+    On Error GoTo App_WorkbookAfterSave_Error
+
     'Export all the modules for this work book if save was successful
     If success Then
         Build.exportVbaCode wb.VBProject
@@ -30,8 +30,8 @@ Private Sub App_WorkbookAfterSave(ByVal wb As Workbook, ByVal success As Boolean
         MsgBox "Saving workbook: " & wb.name & " was not successful. Code is not exported."
     End If
 
-   On Error GoTo 0
-   Exit Sub
+    On Error GoTo 0
+    Exit Sub
 App_WorkbookAfterSave_Error:
     ErrorHandling.handleError "vbaDeveloper.EventListener afterSave"
 End Sub
@@ -41,8 +41,8 @@ Private Sub App_WorkbookBeforeSave(ByVal wb As Workbook, ByVal SaveAsUI As Boole
 End Sub
 
 Private Sub App_WorkbookOpen(ByVal wb As Workbook)
-   On Error GoTo App_WorkbookOpen_Error
-    
+    On Error GoTo App_WorkbookOpen_Error
+
     'Import all the modules for this workbook
     Dim importNow As Integer
     importNow = MsgBox("Import the code for " & wb.name & " now?", vbYesNo, "EventListener Workbook open event")
@@ -50,8 +50,8 @@ Private Sub App_WorkbookOpen(ByVal wb As Workbook)
         Build.importVbaCode wb.VBProject
     End If
 
-   On Error GoTo 0
-   Exit Sub
+    On Error GoTo 0
+    Exit Sub
 App_WorkbookOpen_Error:
     ErrorHandling.handleError "vbaDeveloper.EventListener WorkbookOpen"
 End Sub
