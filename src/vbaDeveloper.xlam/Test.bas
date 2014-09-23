@@ -8,6 +8,24 @@ Private Type myOwn
     car As Variant
 End Type
 
+Enum forTesting
+    the = 1
+    code
+    Formatter
+End Enum
+
+Public Enum forFormatTesting
+    the = 2
+    code
+    Formatter
+End Enum
+
+Private Enum rettamrof
+    the = 3
+    code
+    Formatter
+End Enum
+
 Public Sub testMyCustomActions_Open()
     Dim myCustomAction As CustomActions
     Set myCustomAction = New MyCustomActions
@@ -18,7 +36,7 @@ End Sub
 Public Sub testImport()
     Dim proj_name As String
     proj_name = "vbaDeveloper"
-    
+
     Dim vbaProject As Object
     Set vbaProject = Application.VBE.VBProjects(proj_name)
     Build.importVbaCode vbaProject
@@ -28,7 +46,7 @@ End Sub
 Public Sub testExport()
     Dim proj_name As String
     proj_name = "vbaDeveloper"
-    
+
     Dim vbaProject As Object
     Set vbaProject = Application.VBE.VBProjects(proj_name)
     Build.exportVbaCode vbaProject
@@ -61,6 +79,30 @@ Private Sub anotherPrivateSub()
     Dim y As Integer
     y = 4
     Do Until y = 0
+        Select Case y
+            Case 3, 4, 5 'Do nothing
+            Case 2 To 22
+                'do nothing else
+                'do nothing else
+            Case 1:
+                Dim x
+                x = y + x
+                x = y * y
+                Select Case x
+                        'A nested case statement
+                    Case Is < 0:
+                        Err.Raise vbError + 1, "Test", "Did not expect that x < 0"
+                    Case 4, 16, 64:
+                        x = x / 2
+                    Case 1, 3, 5
+                        Debug.Print "x is not 6"
+                End Select
+                x = x * y
+            Case Else
+                Dim z As Integer
+                z = y
+                y = y + 4
+        End Select
         y = y - 1
     Loop
     y = 5
@@ -77,12 +119,17 @@ Public Function anotherPublicFunction() As String
         If 2 Then
             x.butThat doesnt, matter
         Else
+            'comments are indented
             If False Then
+                'just like other code
                 'we don't do anything here
             ElseIf True Then
                 becauseWe dont.Run, thiscode
+                'this comment
             Else
+                'also indents
                 If x > 0 Then
+                    'x is positive
                     x = 0
                 ElseIf x > -5 Then
                     x = -5
@@ -123,14 +170,20 @@ Function withoutAccessModifier()
     Loop
 End Function
 
-Sub aSubWithoutAccessModifier()
+Sub aSubWithoutAccessModifier(that As Variant, _
+    has As String, _
+    a As Integer, _
+    lot As Integer, _
+    of As Variant, Optional _
+    parameters As String = "default")
+    
     Dim p As Object
 somelabel:
     With p
         .codeIsNotSupposedToReachHere
     End With
 anotherLabel:
-    
+
 End Sub
 
 ' some more comments
