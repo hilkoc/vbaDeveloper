@@ -8,6 +8,8 @@ VbaDeveloper can also import the code again into your excel workbook. This is pa
 
 A code formatter for VBA is also included. It is implemented in VBA and can be directly run as a macro within the VBA Editor, so you can format your code as you write it. The most convenient way to run it is by opening the immediate window and then typing 'format'. This will format the active codepane.
 
+All functionality is also easily accessible via a menu. Look for the vbaDeveloper menu in the ribbon, under the addins section.
+
 Building the addin
 -----------------------
 

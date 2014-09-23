@@ -15,8 +15,10 @@ Public Sub createMenu()
 
     Dim exSubMenu As CommandBarPopup
     Dim imSubMenu As CommandBarPopup
+    Dim formatSubMenu As CommandBarPopup
     Set exSubMenu = addSubmenu(rootMenu, 1, "Export code for ...")
     Set imSubMenu = addSubmenu(rootMenu, 2, "Import code for ...")
+    Set formatSubMenu = addSubmenu(rootMenu, 3, "Format code for ...")
     addMenuSeparator rootMenu
     Dim refreshItem As CommandBarButton
     Set refreshItem = addMenuItem(rootMenu, "Menu.refreshMenu", "Refresh this menu")
@@ -35,10 +37,13 @@ Public Sub createMenu()
         caption = projectName & " (" & Dir(project.fileName) & ")" '<- this can throw error
         Dim exCommand As String
         Dim imCommand As String
+        Dim formatCommand As String
         exCommand = "'Menu.exportVbProject """ & projectName & """'"
         imCommand = "'Menu.importVbProject """ & projectName & """'"
+        formatCommand = "'Menu.formatVbProject """ & projectName & """'"
         addMenuItem exSubMenu, exCommand, caption
         addMenuItem imSubMenu, imCommand, caption
+        addMenuItem formatSubMenu, formatCommand, caption
 nextProject:
     Next vProject
     On Error GoTo 0 'reset the error handling
@@ -104,4 +109,20 @@ Public Sub importVbProject(ByVal projectName As String)
     Exit Sub
 importVbProject_Error:
     ErrorHandling.handleError "Menu.importVbProject"
+End Sub
+
+Public Sub formatVbProject(ByVal projectName As String)
+    On Error GoTo formatVbProject_Error
+
+    Dim project As VBProject
+    Set project = Application.VBE.VBProjects(projectName)
+    Formatter.formatProject project
+    MsgBox "Finished formatting code for: " & project.name & vbNewLine _
+    & vbNewLine _
+    & "Did you know you can also format your code, while writing it, by typing 'format' in the immediate window?"
+
+    On Error GoTo 0
+    Exit Sub
+formatVbProject_Error:
+    ErrorHandling.handleError "Menu.formatVbProject"
 End Sub
