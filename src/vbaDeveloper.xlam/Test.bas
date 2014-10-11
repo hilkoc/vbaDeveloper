@@ -47,9 +47,7 @@ Public Sub testExport()
     Dim proj_name As String
     proj_name = "vbaDeveloper"
 
-    Dim vbaProject As Object
-    Set vbaProject = Application.VBE.VBProjects(proj_name)
-    Build.exportVbaCode vbaProject
+    menu.exportVbProject proj_name
 End Sub
 
 
@@ -162,6 +160,9 @@ Function withoutAccessModifier()
     Dim y As Integer
     Dim finished As Boolean
     finished = False
+    'this is also not:
+'alabel:
+'andthis:
     Do While Not finished
         y = y + 1
         If y = 10 Then
@@ -172,18 +173,32 @@ End Function
 
 Sub aSubWithoutAccessModifier(that As Variant, _
     has As String, _
-    a As Integer, _
+    A As Integer, _
     lot As Integer, _
     of As Variant, Optional _
     parameters As String = "default")
 
     Dim p As Object
 somelabel:
+    'the next line
+    'is not a label:
     With p
         .codeIsNotSupposedToReachHere
     End With
 anotherLabel:
 
+End Sub
+
+Sub testIsLabel()
+
+    Dim line1 As String, line2 As String
+    line1 = "'somelabel:"
+    line2 = "some label:"
+    Debug.Print InStr(line2, " ")
+    Debug.Print InStr(" ", line2)
+
+    Debug.Print VbaDeveloper.Formatter.isLabel(line1)
+    Debug.Print VbaDeveloper.Formatter.isLabel(line2)
 End Sub
 
 ' some more comments

@@ -46,33 +46,65 @@ Public Sub testExport()
 End Sub
 
 
-
-' Usually called after the given workbook is saved
-Public Sub exportVbaCode(vbaProject As VBProject)
-    'locate and create the export directory if necessary
-    Dim vbProjectFileName As String
-    vbProjectFileName = vbaProject.fileName
-    If vbProjectFileName = "" Then
+' Returns the directory where code is exported to or imported from.
+' When createIfNotExists:=True, the directory will be created if it does not exist yet.
+' This is desired when we get the directory for exporting.
+' When createIfNotExists:=False and the directory does not exist, an empty String is returned.
+' This is desired when we get the directory for importing.
+'
+' Directory names always end with a '\', unless an empty string is returned.
+' Usually called with: fullWorkbookPath = wb.FullName or fullWorkbookPath = vbProject.fileName
+' if the workbook is new and has never been saved,
+' vbProject.fileName will throw an error while wb.FullName will return a name without slashes.
+Public Function getSourceDir(fullWorkbookPath As String, createIfNotExists As Boolean) As String
+    ' First check if the fullWorkbookPath contains a \.
+    If Not InStr(fullWorkbookPath, "\") > 0 Then
         'In this case it is a new workbook, we skip it
-        Exit Sub
+        Exit Function
     End If
 
     Dim fso As New Scripting.FileSystemObject
     Dim projDir As String
-    projDir = fso.GetParentFolderName(vbProjectFileName)
-    Dim proj_root As String
-    proj_root = projDir & "\src\"
-    Dim export_path As String
-    export_path = proj_root & fso.GetFileName(vbProjectFileName)
+    projDir = fso.GetParentFolderName(fullWorkbookPath) & "\"
+    Dim srcDir As String
+    srcDir = projDir & "src\"
+    Dim exportDir As String
+    exportDir = srcDir & fso.GetFileName(fullWorkbookPath) & "\"
 
-    If Not fso.FolderExists(proj_root) Then
-        fso.CreateFolder proj_root
-        Debug.Print "Created Folder " & proj_root
+    If createIfNotExists Then
+        If Not fso.FolderExists(srcDir) Then
+            fso.CreateFolder srcDir
+            Debug.Print "Created Folder " & srcDir
+        End If
+        If Not fso.FolderExists(exportDir) Then
+            fso.CreateFolder exportDir
+            Debug.Print "Created Folder " & exportDir
+        End If
+    Else
+        If Not fso.FolderExists(exportDir) Then
+            Debug.Print "Folder does not exist: " & exportDir
+            exportDir = ""
+        End If
     End If
-    If Not fso.FolderExists(export_path) Then
-        fso.CreateFolder export_path
-        Debug.Print "Created Folder " & export_path
+    getSourceDir = exportDir
+End Function
+
+
+' Usually called after the given workbook is saved
+Public Sub exportVbaCode(vbaProject As VBProject)
+    Dim vbProjectFileName As String
+    On Error Resume Next
+    'this can throw if the workbook has never been saved.
+    vbProjectFileName = vbaProject.fileName
+    On Error GoTo 0
+    If vbProjectFileName = "" Then
+        'In this case it is a new workbook, we skip it
+        Debug.Print "No file name for project " & vbaProject.name & ", skipping"
+        Exit Sub
     End If
+
+    Dim export_path As String
+    export_path = getSourceDir(vbProjectFileName, createIfNotExists:=True)
 
     Debug.Print "exporting to " & export_path
     'export all components
@@ -102,7 +134,7 @@ Private Function hasCodeToExport(component As VBComponent) As Boolean
     hasCodeToExport = True
     If component.codeModule.CountOfLines <= 2 Then
         Dim firstLine As String
-        firstLine = Trim(component.codeModule.Lines(1, 1))
+        firstLine = Trim(component.codeModule.lines(1, 1))
         'Debug.Print firstLine
         hasCodeToExport = Not (firstLine = "" Or firstLine = "Option Explicit")
     End If
@@ -126,14 +158,13 @@ Private Sub exportLines(exportPath As String, component As VBComponent)
     Dim fso As New Scripting.FileSystemObject
     Dim outStream As TextStream
     Set outStream = fso.CreateTextFile(fileName, True, False)
-    outStream.Write (component.codeModule.Lines(1, component.codeModule.CountOfLines))
+    outStream.Write (component.codeModule.lines(1, component.codeModule.CountOfLines))
     outStream.Close
 End Sub
 
 
 ' Usually called after the given workbook is opened
 Public Sub importVbaCode(vbaProject As VBProject)
-    'find project files
     Dim vbProjectFileName As String
     On Error Resume Next
     'this can throw if the workbook has never been saved.
@@ -145,20 +176,11 @@ Public Sub importVbaCode(vbaProject As VBProject)
         Exit Sub
     End If
 
-    Dim fso As New Scripting.FileSystemObject
-    Dim projDir As String
-    projDir = fso.GetParentFolderName(vbProjectFileName)
-    Dim proj_root As String
-    proj_root = projDir & "\src\"
     Dim export_path As String
-    export_path = proj_root & fso.GetFileName(vbProjectFileName)
-
-    If Not fso.FolderExists(proj_root) Then
-        Debug.Print "Could not find folder " & proj_root
-        Exit Sub
-    End If
-    If Not fso.FolderExists(export_path) Then
-        Debug.Print "Could not find folder " & export_path
+    export_path = getSourceDir(vbProjectFileName, createIfNotExists:=False)
+    If export_path = "" Then
+        'The source directory does not exist, code has never been exported for this vbaProject.
+        Debug.Print "No import directory for project " & vbaProject.name & ", skipping"
         Exit Sub
     End If
 
@@ -167,6 +189,7 @@ Public Sub importVbaCode(vbaProject As VBProject)
     Set sheetsToImport = New Dictionary
     Set vbaProjectToImport = vbaProject
 
+    Dim fso As New Scripting.FileSystemObject
     Dim projContents As Folder
     Set projContents = fso.GetFolder(export_path)
     Dim file As Object
@@ -188,6 +211,7 @@ Public Sub importVbaCode(vbaProject As VBProject)
     Application.OnTime Now() + TimeValue(IMPORT_DELAY), "'Build.importComponents'"
     Debug.Print "almost finished importing code for " & vbaProject.name
 End Sub
+
 
 Private Sub checkHowToImport(file As Object)
     Dim fileName As String
@@ -220,6 +244,7 @@ Private Sub checkHowToImport(file As Object)
     End If
 End Sub
 
+
 ' Only removes the vba component if it exists
 Private Sub removeComponent(vbaProject As VBProject, componentName As String)
     If componentExists(vbaProject, componentName) Then
@@ -230,9 +255,10 @@ Private Sub removeComponent(vbaProject As VBProject, componentName As String)
     End If
 End Sub
 
+
 Public Sub importComponents()
     If componentsToImport Is Nothing Then
-        Debug.Print "Failed to import! 'Dictionary 'componentsToImport' was not initialized."
+        Debug.Print "Failed to import! Dictionary 'componentsToImport' was not initialized."
         Exit Sub
     End If
     Dim componentName As String
@@ -249,12 +275,13 @@ Public Sub importComponents()
     Next
 
     Debug.Print "Finished importing code for " & vbaProjectToImport.name
-    'We're done, clear globals explicitly to free memory
+    'We're done, clear globals explicitly to free memory.
     Set componentsToImport = Nothing
     Set vbaProjectToImport = Nothing
 End Sub
 
-' Assumes any component with same name has already been removed
+
+' Assumes any component with same name has already been removed.
 Private Sub importComponent(vbaProject As VBProject, filePath As String)
     Debug.Print "Importing component from  " & filePath
     vbaProject.VBComponents.Import filePath
@@ -266,7 +293,7 @@ Private Sub importLines(vbaProject As VBProject, file As Object)
     componentName = left(file.name, InStr(file.name, ".") - 1)
     Dim c As VBComponent
     If Not componentExists(vbaProject, componentName) Then
-        'Create a sheet to import this code into. We cannot set the ws.codeName property which is read-only,
+        ' Create a sheet to import this code into. We cannot set the ws.codeName property which is read-only,
         ' instead we set its vbComponent.name which leads to the same result.
         Dim addedSheetCodeName As String
         addedSheetCodeName = addSheetToWorkbook(componentName, vbaProject.fileName)
@@ -276,7 +303,7 @@ Private Sub importLines(vbaProject As VBProject, file As Object)
     Set c = vbaProject.VBComponents(componentName)
     Debug.Print "Importing lines from " & componentName & " into component " & c.name
 
-    ' At this point compilation errors may cause a crash, so we ignore those
+    ' At this point compilation errors may cause a crash, so we ignore those.
     On Error Resume Next
     c.codeModule.DeleteLines 1, c.codeModule.CountOfLines
     c.codeModule.AddFromFile file.Path
@@ -309,6 +336,7 @@ Public Function openWorkbook(ByVal filePath As String) As Workbook
     End If
     Set openWorkbook = wb
 End Function
+
 
 ' Returns the CodeName of the added sheet or an empty String if the workbook could not be opened.
 Public Function addSheetToWorkbook(sheetName As String, workbookFilePath As String) As String

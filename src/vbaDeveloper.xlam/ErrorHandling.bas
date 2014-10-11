@@ -1,13 +1,14 @@
 Attribute VB_Name = "ErrorHandling"
 Option Explicit
 
-Public Sub RaiseError(errNumber As Integer, Optional errSource As String = "", Optional errMessage As String = "")
+Public Sub RaiseError(errNumber As Integer, Optional errSource As String = "", Optional errDescription As String = "")
     If errSource = "" Then 'set default values
         errSource = Err.Source
-        errMessage = Err.Description
+        errDescription = Err.Description
     End If
-    Err.Raise vbObjectError + errNumber, errSource, errMessage
+    Err.Raise vbObjectError + errNumber, errSource, errDescription
 End Sub
+
 
 Public Sub handleError(Optional errLocation As String = "")
     Dim errorMessage As String

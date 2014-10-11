@@ -1,7 +1,7 @@
 Attribute VB_Name = "Menu"
 Option Explicit
 
-Private Const MENU_TITLE = "vbaDeveloper"
+Private Const MENU_TITLE = "VbaDeveloper"
 
 Public Sub createMenu()
     Dim rootMenu As CommandBarPopup
@@ -49,6 +49,7 @@ nextProject:
     On Error GoTo 0 'reset the error handling
 End Sub
 
+
 Private Function addMenuItem(menu As CommandBarPopup, ByVal onAction As String, ByVal caption As String) As CommandBarButton
     Dim menuItem As CommandBarButton
     Set menuItem = menu.Controls.Add(Type:=msoControlButton)
@@ -65,6 +66,7 @@ Private Function addSubmenu(menu As CommandBarPopup, ByVal position As Integer, 
     subMenu.caption = caption
     Set addSubmenu = subMenu
 End Function
+
 
 Private Sub addMenuSeparator(menuItem As CommandBarPopup)
     menuItem.BeginGroup = True
@@ -89,6 +91,9 @@ Public Sub exportVbProject(ByVal projectName As String)
     Dim project As VBProject
     Set project = Application.VBE.VBProjects(projectName)
     Build.exportVbaCode project
+    Dim wb As Workbook
+    Set wb = Build.openWorkbook(project.fileName)
+    NamedRanges.exportNamedRanges wb
     MsgBox "Finished exporting code for: " & project.name
 
     On Error GoTo 0
@@ -97,12 +102,16 @@ exportVbProject_Error:
     ErrorHandling.handleError "Menu.exportVbProject"
 End Sub
 
+
 Public Sub importVbProject(ByVal projectName As String)
     On Error GoTo importVbProject_Error
 
     Dim project As VBProject
     Set project = Application.VBE.VBProjects(projectName)
     Build.importVbaCode project
+    Dim wb As Workbook
+    Set wb = Build.openWorkbook(project.fileName)
+    NamedRanges.importNamedRanges wb
     MsgBox "Finished importing code for: " & project.name
 
     On Error GoTo 0
@@ -110,6 +119,7 @@ Public Sub importVbProject(ByVal projectName As String)
 importVbProject_Error:
     ErrorHandling.handleError "Menu.importVbProject"
 End Sub
+
 
 Public Sub formatVbProject(ByVal projectName As String)
     On Error GoTo formatVbProject_Error
@@ -119,7 +129,7 @@ Public Sub formatVbProject(ByVal projectName As String)
     Formatter.formatProject project
     MsgBox "Finished formatting code for: " & project.name & vbNewLine _
     & vbNewLine _
-    & "Did you know you can also format your code, while writing it, by typing 'format' in the immediate window?"
+    & "Did you know you can also format your code, while writing it, by typing 'application.Run ""format""' in the immediate window?"
 
     On Error GoTo 0
     Exit Sub

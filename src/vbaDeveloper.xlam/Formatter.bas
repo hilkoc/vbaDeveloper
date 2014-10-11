@@ -165,7 +165,7 @@ Public Sub formatCode(codePane As codeModule)
     Dim lineNr As Integer
     For lineNr = 1 To lineCount
         Dim line As String
-        line = Trim(codePane.Lines(lineNr, 1))
+        line = Trim(codePane.lines(lineNr, 1))
         If Not line = "" Then
             If isEqual(ONEWORD_ELSE, line) _
                 Or lineStartsWith(BEG_END_ELSEIF, line) _
@@ -205,7 +205,7 @@ Public Sub removeIndentation(codePane As codeModule)
     Dim lineNr As Integer
     For lineNr = 1 To lineCount
         Dim line As String
-        line = codePane.Lines(lineNr, 1)
+        line = codePane.lines(lineNr, 1)
         line = Trim(line)
         Call codePane.ReplaceLine(lineNr, line)
     Next
@@ -249,6 +249,7 @@ Private Function lineStartsWith(begin As String, strToCheck As String) As Boolea
 End Function
 
 
-Private Function isLabel(line As String) As Boolean
-    isLabel = (right(line, 1) = ":")
+Public Function isLabel(line As String) As Boolean
+    'it must end with a colon: and may not contain a space.
+    isLabel = (right(line, 1) = ":") And (InStr(line, " ") < 1)
 End Function
