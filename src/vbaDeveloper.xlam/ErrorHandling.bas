@@ -2,7 +2,8 @@ Attribute VB_Name = "ErrorHandling"
 Option Explicit
 
 Public Sub RaiseError(errNumber As Integer, Optional errSource As String = "", Optional errDescription As String = "")
-    If errSource = "" Then 'set default values
+    If errSource = "" Then
+        'set default values
         errSource = Err.Source
         errDescription = Err.Description
     End If

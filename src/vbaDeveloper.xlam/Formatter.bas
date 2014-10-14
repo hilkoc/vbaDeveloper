@@ -33,6 +33,8 @@ Private Const BEG_FOR = "For "
 Private Const END_FOR = "Next "
 Private Const BEG_DOWHILE = "Do While "
 Private Const BEG_DOUNTIL = "Do Until "
+Private Const BEG_WHILE = "While "
+Private Const END_WHILE = "Wend"
 
 Private Const BEG_TYPE = "Type "
 Private Const END_TYPE = "End Type"
@@ -41,11 +43,14 @@ Private Const BEG_PV_TYPE = "Private Type "
 
 ' Single words that need to be handled separately
 Private Const ONEWORD_END_FOR = "Next"
+Private Const ONEWORD_DO = "Do"
 Private Const ONEWORD_END_LOOP = "Loop"
 Private Const ONEWORD_ELSE = "Else"
 Private Const BEG_END_ELSEIF = "ElseIf"
 Private Const BEG_END_CASE = "Case "
 
+Private Const THEN_KEYWORD = "Then"
+Private Const LINE_CONTINUATION = "_"
 
 Private Const INDENT = "    "
 
@@ -93,7 +98,8 @@ Private Sub initializeWords()
 
     w.Add BEG_IF, 1
     w.Add END_IF, -1
-    w.Add BEG_SELECT, 2 'because any following 'Case' indents to the left
+    'because any following 'Case' indents to the left we jump two
+    w.Add BEG_SELECT, 2
     w.Add END_SELECT, -2
     w.Add BEG_WITH, 1
     w.Add END_WITH, -1
@@ -102,6 +108,8 @@ Private Sub initializeWords()
     w.Add END_FOR, -1
     w.Add BEG_DOWHILE, 1
     w.Add BEG_DOUNTIL, 1
+    w.Add BEG_WHILE, 1
+    w.Add END_WHILE, -1
 
     w.Add BEG_TYPE, 1
     w.Add END_TYPE, -1
@@ -170,11 +178,16 @@ Public Sub formatCode(codePane As codeModule)
             If isEqual(ONEWORD_ELSE, line) _
                 Or lineStartsWith(BEG_END_ELSEIF, line) _
                 Or lineStartsWith(BEG_END_CASE, line) Then
+                ' Case, Else, ElseIf need to jump to the left
                 levelChange = 1
                 indentLevel = -1 + indentLevel
             ElseIf isLabel(line) Then
+                ' Labels don't have indentation
                 levelChange = indentLevel
                 indentLevel = 0
+                ' check for oneline If statemts
+            ElseIf isOneLineIfStatemt(line) Then
+                levelChange = 0
             Else
                 levelChange = indentChange(line)
             End If
@@ -221,6 +234,10 @@ Private Function indentChange(ByVal line As String) As Integer
         indentChange = -1
         GoTo hell
     End If
+    If isEqual(ONEWORD_DO, line) Then
+        indentChange = 1
+        GoTo hell
+    End If
     Dim word As String
     Dim vord As Variant
     For Each vord In w.Keys
@@ -249,7 +266,23 @@ Private Function lineStartsWith(begin As String, strToCheck As String) As Boolea
 End Function
 
 
-Public Function isLabel(line As String) As Boolean
+' Returns True if strToCheck ends with ending, ignoring case
+Private Function lineEndsWith(ending As String, strToCheck As String) As Boolean
+    lineEndsWith = False
+    Dim length As Integer
+    length = Len(ending)
+    If Len(strToCheck) >= length Then
+        lineEndsWith = isEqual(ending, right(strToCheck, length))
+    End If
+End Function
+
+
+Private Function isLabel(line As String) As Boolean
     'it must end with a colon: and may not contain a space.
     isLabel = (right(line, 1) = ":") And (InStr(line, " ") < 1)
+End Function
+
+
+Private Function isOneLineIfStatemt(line As String) As Boolean
+    isOneLineIfStatemt = (lineStartsWith(BEG_IF, line) And (Not lineEndsWith(THEN_KEYWORD, line)) And Not lineEndsWith(LINE_CONTINUATION, line))
 End Function

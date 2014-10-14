@@ -24,7 +24,9 @@ Private Sub App_WorkbookAfterSave(ByVal wb As Workbook, ByVal success As Boolean
 
     'Export all the modules for this work book if save was successful
     If success Then
+        Formatter.formatProject wb.VBProject
         Build.exportVbaCode wb.VBProject
+        NamedRanges.exportNamedRanges wb
         MsgBox "Finished saving workbook: " & wb.name & " . Code is exported."
     Else
         MsgBox "Saving workbook: " & wb.name & " was not successful. Code is not exported."
@@ -48,6 +50,7 @@ Private Sub App_WorkbookOpen(ByVal wb As Workbook)
     importNow = MsgBox("Import the code for " & wb.name & " now?", vbYesNo, "EventListener Workbook open event")
     If importNow = vbYes Then
         Build.importVbaCode wb.VBProject
+        NamedRanges.importNamedRanges wb
     End If
 
     On Error GoTo 0
