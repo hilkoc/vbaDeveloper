@@ -16,7 +16,9 @@ End Sub
 Private Sub Workbook_BeforeClose(Cancel As Boolean)
     Debug.Print "vbaDeveloper thisWorkbook_BeforeClose()"
     menu.deleteMenu
-    customAction.beforeClose
-    Set customAction = Nothing
+    If Not customAction Is Nothing Then
+        customAction.beforeClose
+        Set customAction = Nothing
+    End If
     Set listener = Nothing
 End Sub

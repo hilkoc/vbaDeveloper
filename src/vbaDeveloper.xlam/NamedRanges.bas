@@ -22,15 +22,17 @@ Public Sub importNamedRanges(wb As Workbook)
 
     Dim fileName As String
     fileName = importDir & NAMED_RANGES_FILE_NAME
-
     Dim fso As New Scripting.FileSystemObject
-    Dim inStream As TextStream
-    Set inStream = fso.OpenTextFile(fileName, ForReading, Create:=False)
-    Dim line As String
-    Do Until inStream.AtEndOfStream
-        line = inStream.ReadLine
-        importName wb, line
-    Loop
+    If fso.FileExists(fileName) Then
+        Dim inStream As TextStream
+        Set inStream = fso.OpenTextFile(fileName, ForReading, Create:=False)
+        Dim line As String
+        Do Until inStream.AtEndOfStream
+            line = inStream.ReadLine
+            importName wb, line
+        Loop
+        inStream.Close
+    End If
 End Sub
 
 
