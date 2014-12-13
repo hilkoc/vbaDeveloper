@@ -22,10 +22,10 @@ Public Sub importNamedRanges(wb As Workbook)
 
     Dim fileName As String
     fileName = importDir & NAMED_RANGES_FILE_NAME
-    Dim fso As New Scripting.FileSystemObject
-    If fso.FileExists(fileName) Then
+    Dim FSO As New Scripting.FileSystemObject
+    If FSO.FileExists(fileName) Then
         Dim inStream As TextStream
-        Set inStream = fso.OpenTextFile(fileName, ForReading, Create:=False)
+        Set inStream = FSO.OpenTextFile(fileName, ForReading, Create:=False)
         Dim line As String
         Do Until inStream.AtEndOfStream
             line = inStream.ReadLine
@@ -71,9 +71,9 @@ Public Sub exportNamedRanges(wb As Workbook)
         'We have some names to export
         Debug.Print "writing to  " & fileName
 
-        Dim fso As New Scripting.FileSystemObject
+        Dim FSO As New Scripting.FileSystemObject
         Dim outStream As TextStream
-        Set outStream = fso.CreateTextFile(fileName, overwrite:=True, unicode:=False)
+        Set outStream = FSO.CreateTextFile(fileName, overwrite:=True, unicode:=False)
         On Error GoTo closeStream
         Dim line As Variant
         For Each line In lines

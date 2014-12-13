@@ -261,7 +261,7 @@ Private Function lineStartsWith(begin As String, strToCheck As String) As Boolea
     Dim beginLength As Integer
     beginLength = Len(begin)
     If Len(strToCheck) >= beginLength Then
-        lineStartsWith = isEqual(begin, left(strToCheck, beginLength))
+        lineStartsWith = isEqual(begin, Left(strToCheck, beginLength))
     End If
 End Function
 
@@ -272,14 +272,14 @@ Private Function lineEndsWith(ending As String, strToCheck As String) As Boolean
     Dim length As Integer
     length = Len(ending)
     If Len(strToCheck) >= length Then
-        lineEndsWith = isEqual(ending, right(strToCheck, length))
+        lineEndsWith = isEqual(ending, Right(strToCheck, length))
     End If
 End Function
 
 
 Private Function isLabel(line As String) As Boolean
     'it must end with a colon: and may not contain a space.
-    isLabel = (right(line, 1) = ":") And (InStr(line, " ") < 1)
+    isLabel = (Right(line, 1) = ":") And (InStr(line, " ") < 1)
 End Function
 
 
