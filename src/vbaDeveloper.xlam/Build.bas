@@ -1,7 +1,7 @@
 Attribute VB_Name = "Build"
 '''
 ' Build instructions:
-' 1. Open a new workbook in excel, then open the VB editor (Alt+F11)  and from the menu File->Import, import these files:
+' 1. Open a new workbook in excel, then open the VB editor (Alt+F11)  and from the menu File->Import, import this file:
 '     * src/vbaDeveloper.xlam/Build.bas
 ' 2. From tools references... add
 '     * Microsoft Visual Basic for Applications Extensibility 5.3
@@ -9,8 +9,8 @@ Attribute VB_Name = "Build"
 ' 3. Rename the project to 'vbaDeveloper'
 ' 5. Enable programatic access to VBA:
 '       File -> Options -> Trust Center, Trust Center Settings, -> Macros,
-'       tick the box: 'Enable programatic access to VBA'
-' 6. In VB Editor, press F4, then under Microsfoft Excel Objects, select ThisWorkbook.Set the property 'IsAddin' to TRUE
+'       tick the box: 'Enable programatic access to VBA'  (In excel '97: 'Trust access to the vba project object model')
+' 6. In VB Editor, press F4, then under Microsoft Excel Objects, select ThisWorkbook.Set the property 'IsAddin' to TRUE
 ' 7. In VB Editor, menu File-->Save Book1; Save as vbaDeveloper.xlam in the same directory as 'src'
 ' 8. Close excel. Open excel with a new workbook, then open the just saved vbaDeveloper.xlam
 ' 9. Let vbaDeveloper import its own code. Put the cursor in the function 'testImport' and press F5
@@ -21,7 +21,7 @@ Option Explicit
 
 Private Const IMPORT_DELAY As String = "00:00:03"
 
-'We need to make these variables public such that they can be read by application.ontime
+'We need to make these variables public such that they can be given as arguments to application.ontime()
 Public componentsToImport As Dictionary 'Key = componentName, Value = componentFilePath
 Public sheetsToImport As Dictionary 'Key = componentName, Value = File object
 Public vbaProjectToImport As VBProject
@@ -285,6 +285,7 @@ End Sub
 ' Assumes any component with same name has already been removed.
 Private Sub importComponent(vbaProject As VBProject, filePath As String)
     Debug.Print "Importing component from  " & filePath
+    'This next line is a bug! It imports all classes as modules!
     vbaProject.VBComponents.Import filePath
 End Sub
 
@@ -357,4 +358,3 @@ Public Function addSheetToWorkbook(sheetName As String, workbookFilePath As Stri
         addSheetToWorkbook = ""
     End If
 End Function
-
