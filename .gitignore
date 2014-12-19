@@ -1,1 +1,5 @@
-/vbaDeveloper.xlam
+*.xlam
+*.xlsm
+*.xlsx
+*.xla
+*.xls

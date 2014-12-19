@@ -27,8 +27,7 @@ Private Enum rettamrof
 End Enum
 
 Public Sub testMyCustomActions_Open()
-    Dim myCustomAction As CustomActions
-    Set myCustomAction = New MyCustomActions
+    Dim myCustomAction As Object
     myCustomAction.afterOpen
 End Sub
 
@@ -190,15 +189,11 @@ anotherLabel:
 End Sub
 
 Sub testIsLabel()
-
     Dim line1 As String, line2 As String
     line1 = "'somelabel:"
     line2 = "some label:"
     Debug.Print InStr(line2, " ")
     Debug.Print InStr(" ", line2)
-
-    Debug.Print VbaDeveloper.Formatter.isLabel(line1)
-    Debug.Print VbaDeveloper.Formatter.isLabel(line2)
 End Sub
 
 ' some more comments

@@ -163,8 +163,9 @@ Private Sub exportLines(exportPath As String, component As VBComponent)
 End Sub
 
 
-' Usually called after the given workbook is opened
-Public Sub importVbaCode(vbaProject As VBProject)
+' Usually called after the given workbook is opened. The option includeClassFiles is False by default because
+' they don't import correctly from VBA. They'll have to be imported manually instead.
+Public Sub importVbaCode(vbaProject As VBProject, Optional includeClassFiles As Boolean = False)
     Dim vbProjectFileName As String
     On Error Resume Next
     'this can throw if the workbook has never been saved.
@@ -195,7 +196,7 @@ Public Sub importVbaCode(vbaProject As VBProject)
     Dim file As Object
     For Each file In projContents.Files()
         'check if and how to import the file
-        checkHowToImport file
+        checkHowToImport file, includeClassFiles
     Next
 
     Dim componentName As String
@@ -213,7 +214,7 @@ Public Sub importVbaCode(vbaProject As VBProject)
 End Sub
 
 
-Private Sub checkHowToImport(file As Object)
+Private Sub checkHowToImport(file As Object, includeClassFiles As Boolean)
     Dim fileName As String
     fileName = file.name
     Dim componentName As String
@@ -232,8 +233,12 @@ Private Sub checkHowToImport(file As Object)
                     'import lines into sheet: importLines vbaProjectToImport, file
                     sheetsToImport.Add componentName, file
                 Else
-                    'importComponent vbaProject, file
-                    componentsToImport.Add componentName, file.Path
+                    ' .cls files don't import correctly because of a bug in excel, therefore we can exclude them.
+                    ' In that case they'll have to be imported manually.
+                    If includeClassFiles Then
+                        'importComponent vbaProject, file
+                        componentsToImport.Add componentName, file.Path
+                    End If
                 End If
             Case ".bas", ".frm"
                 'importComponent vbaProject, file
