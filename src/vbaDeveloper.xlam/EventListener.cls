@@ -21,6 +21,7 @@ End Sub
 
 Private Sub App_WorkbookAfterSave(ByVal wb As Workbook, ByVal success As Boolean)
     On Error GoTo App_WorkbookAfterSave_Error
+	If AUTO_SAVE = "Yes" Then   'This is set manually in the 'Build' macro so that users can choose whether they want autosave enabled.
 
     'Export all the modules for this work book if save was successful
     If success Then
@@ -44,6 +45,8 @@ End Sub
 
 Private Sub App_WorkbookOpen(ByVal wb As Workbook)
     On Error GoTo App_WorkbookOpen_Error
+
+	If AUTO_SAVE = "Yes" Then   'This is set manually in the 'Build' macro so that users can choose whether they want autosave enabled.
 
     'Import all the modules for this workbook
     Dim importNow As Integer
