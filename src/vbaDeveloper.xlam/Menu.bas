@@ -1,7 +1,7 @@
 Attribute VB_Name = "Menu"
 Option Explicit
 
-Private Const MENU_TITLE = "VBA Code Import-Export"
+Private Const MENU_TITLE = "VbaDeveloper"
 Private Const XML_MENU_TITLE = "XML Import-Export"
 Private Const MENU_REFRESH = "Refresh this menu"
 
@@ -34,7 +34,7 @@ Public Sub createMenu()
         Dim project As VBProject
         Set project = vProject
         Dim projectName As String, caption As String
-        
+
         projectName = project.name
         caption = projectName & " (" & Dir(project.fileName) & ")" '<- this can throw error
 
@@ -63,7 +63,7 @@ nextProject:
     rebuildButton.FaceId = 35
     Set refreshItem = addMenuItem(xmlMenu, "Menu.refreshMenu", MENU_REFRESH)
     refreshItem.FaceId = 37
-    
+
     'add menu items for all open files
     Dim fileName As String
     Dim openFile As Workbook
@@ -71,7 +71,7 @@ nextProject:
         fileName = openFile.name
         Call addMenuItem(exXmlSubMenu, "'Menu.exportXML """ & fileName & """'", fileName)
     Next openFile
-    
+
 End Sub
 
 
@@ -173,14 +173,14 @@ formatVbProject_Error:
     ErrorHandling.handleError "Menu.formatVbProject"
 End Sub
 
+
 Public Sub exportXML(ByVal fileShortName As String)
     'Ask them if they want to save the file first. Warn that existing files could be overwritten. Default to 'Cancel'
-    'TODO
     Dim validateChoice As Integer, prompt As String, title As String
     prompt = "Are you sure you want to export " & fileShortName & " to XML? Any previously exported XML data for that file will be overwritten."
     title = "Overwrite existing XML?"
     validateChoice = MsgBox(prompt, vbYesNoCancel, title)
-    
+
     prompt = "Do you want to save the file before exporting? If unsaved, the exported version will reflect only changes until your most recent save."
     title = "Save file first?"
     validateChoice = MsgBox(prompt, vbYesNoCancel, title)
@@ -190,30 +190,30 @@ Public Sub exportXML(ByVal fileShortName As String)
         Set wkb = Workbooks(fileShortName)
         wkb.Save
     End If
-    
+
     Call unpackXML(fileShortName)
     MsgBox ("File successfully exported to XML. Check the 'src' folder where the file is saved.")
 End Sub
 
 Public Sub rebuildXML()
-'This sub lets the user browse to a folder, sets the destination folder as two levels up the folder tree, and then calls the 'rebuildXML' function to zip up the XML data into an Excel file
+    'This sub lets the user browse to a folder, sets the destination folder as two levels up the folder tree, and then calls the 'rebuildXML' function to zip up the XML data into an Excel file
     Dim destinationFolder As String, containingFolderName As String, errorFlag As Boolean, errorMessage As String
     destinationFolder = "C:\"
     containingFolderName = "C:\"
-    
+
     containingFolderName = GetFolder(destinationFolder)                                                 'Select containing folder using file picker
     containingFolderName = XMLexporter.removeSlash(containingFolderName)                                'Remove trailing slash if it exists
-    
+
     'destinationFolder is two levels up from the containing folder
     On Error GoTo folderError
     destinationFolder = containingFolderName
     destinationFolder = Left(destinationFolder, Len(destinationFolder) - (Len(destinationFolder) - InStrRev(destinationFolder, "\") + 1)) 'up one level
     destinationFolder = Left(destinationFolder, Len(destinationFolder) - (Len(destinationFolder) - InStrRev(destinationFolder, "\") + 1)) 'up another level
     On Error GoTo 0
-    
+
     errorFlag = False
     Call XMLexporter.rebuildXML(destinationFolder, containingFolderName, errorFlag, errorMessage)
-    
+
 folderError:
     If Err.Number <> 0 Then
         errorFlag = True

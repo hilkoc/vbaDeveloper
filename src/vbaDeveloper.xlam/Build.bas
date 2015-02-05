@@ -19,7 +19,6 @@ Attribute VB_Name = "Build"
 
 Option Explicit
 
-Public Const AUTO_SAVE = "No" 'Change to yes if you want the add-in to autosave
 
 Private Const IMPORT_DELAY As String = "00:00:03"
 
@@ -365,3 +364,4 @@ Public Function addSheetToWorkbook(sheetName As String, workbookFilePath As Stri
         addSheetToWorkbook = ""
     End If
 End Function
+
