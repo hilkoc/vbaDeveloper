@@ -5,16 +5,28 @@ Private Const BEG_SUB = "Sub "
 Private Const END_SUB = "End Sub"
 Private Const BEG_PB_SUB = "Public Sub "
 Private Const BEG_PV_SUB = "Private Sub "
+Private Const BEG_FR_SUB = "Friend Sub "
+Private Const BEG_PB_ST_SUB = "Public Static Sub "
+Private Const BEG_PV_ST_SUB = "Private Static Sub "
+Private Const BEG_FR_ST_SUB = "Friend Static Sub "
 
 Private Const BEG_FUN = "Function "
 Private Const END_FUN = "End Function"
 Private Const BEG_PB_FUN = "Public Function "
 Private Const BEG_PV_FUN = "Private Function "
+Private Const BEG_FR_FUN = "Friend Function "
+Private Const BEG_PB_ST_FUN = "Public Static Function "
+Private Const BEG_PV_ST_FUN = "Private Static Function "
+Private Const BEG_FR_ST_FUN = "Friend Static Function "
 
 Private Const BEG_PROP = "Property "
 Private Const END_PROP = "End Property"
 Private Const BEG_PB_PROP = "Public Property "
 Private Const BEG_PV_PROP = "Private Property "
+Private Const BEG_FR_PROP = "Friend Property "
+Private Const BEG_PB_ST_PROP = "Public Static Property "
+Private Const BEG_PV_ST_PROP = "Private Static Property "
+Private Const BEG_FR_ST_PROP = "Friend Static Property "
 
 Private Const BEG_ENUM = "Enum "
 Private Const END_ENUM = "End Enum"
@@ -80,16 +92,28 @@ Private Sub initializeWords()
     w.Add END_SUB, -1
     w.Add BEG_PB_SUB, 1
     w.Add BEG_PV_SUB, 1
+    w.Add BEG_FR_SUB, 1
+    w.Add BEG_PB_ST_SUB, 1
+    w.Add BEG_PV_ST_SUB, 1
+    w.Add BEG_FR_ST_SUB, 1
 
     w.Add BEG_FUN, 1
     w.Add END_FUN, -1
     w.Add BEG_PB_FUN, 1
     w.Add BEG_PV_FUN, 1
+    w.Add BEG_FR_FUN, 1
+    w.Add BEG_PB_ST_FUN, 1
+    w.Add BEG_PV_ST_FUN, 1
+    w.Add BEG_FR_ST_FUN, 1
 
     w.Add BEG_PROP, 1
     w.Add END_PROP, -1
     w.Add BEG_PB_PROP, 1
     w.Add BEG_PV_PROP, 1
+    w.Add BEG_FR_PROP, 1
+    w.Add BEG_PB_ST_PROP, 1
+    w.Add BEG_PV_ST_PROP, 1
+    w.Add BEG_FR_ST_PROP, 1
 
     w.Add BEG_ENUM, 1
     w.Add END_ENUM, -1
