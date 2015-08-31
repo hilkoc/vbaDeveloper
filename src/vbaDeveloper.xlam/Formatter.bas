@@ -69,6 +69,13 @@ Private Const INDENT = "    "
 Private words As Dictionary 'Keys are Strings, Value is an Integer indicating change in indentation
 Private indentation(0 To 20) As Variant ' Prevent repeatedly building the same strings by looking them up in here
 
+' 3-state data type for checking if part of code is within a string or not
+Private Enum StringStatus
+    InString
+    MaybeInString
+    NotInString
+End Enum
+
 Private Sub initialize()
     initializeWords
     initializeIndentation
@@ -308,5 +315,46 @@ End Function
 
 
 Private Function isOneLineIfStatemt(line As String) As Boolean
-    isOneLineIfStatemt = (lineStartsWith(BEG_IF, line) And (Not lineEndsWith(THEN_KEYWORD, line)) And Not lineEndsWith(LINE_CONTINUATION, line))
+    Dim trimmedLine As String
+    trimmedLine = TrimComments(line)
+    isOneLineIfStatemt = (lineStartsWith(BEG_IF, trimmedLine) And (Not lineEndsWith(THEN_KEYWORD, trimmedLine)) And Not lineEndsWith(LINE_CONTINUATION, trimmedLine))
+End Function
+
+
+' Trims trailing comments (and whitespace before a comment) from a line of code
+Private Function TrimComments(ByVal line As String) As String
+    Dim c               As Long
+    Dim inQuotes        As StringStatus
+    Dim inComment       As Boolean
+
+    inQuotes = NotInString
+    inComment = False
+    For c = 1 To Len(line)
+        If Mid(line, c, 1) = Chr(34) Then
+            ' Found a double quote
+            Select Case inQuotes
+                Case NotInString:
+                    inQuotes = InString
+                Case InString:
+                    inQuotes = MaybeInString
+                Case MaybeInString:
+                    inQuotes = InString
+            End Select
+        Else
+            ' Resolve uncertain string status
+            If inQuotes = MaybeInString Then
+                inQuotes = NotInString
+            End If
+        End If
+        ' Now know as much about status inside double quotes as possible, can test for comment
+        If inQuotes = NotInString And Mid(line, c, 1) = "'" Then
+            inComment = True
+            Exit For
+        End If
+    Next c
+    If inComment Then
+        TrimComments = Trim(Left(line, c - 1))
+    Else
+        TrimComments = line
+    End If
 End Function
