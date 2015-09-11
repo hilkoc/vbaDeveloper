@@ -15,6 +15,8 @@ Attribute VB_Name = "Build"
 ' 8. Close excel. Open excel with a new workbook, then open the just saved vbaDeveloper.xlam
 ' 9. Let vbaDeveloper import its own code. Put the cursor in the function 'testImport' and press F5
 ' 10.If necessary rename module 'Build1' to Build. Menu File-->Save vbaDeveloper.xlam
+' 11.Maybe it will necessary add the add-in at menu File -> Options -> Addins.
+' 12.Rename the default project name 'VBAProject' in your projects to avoid conflicts whit native Excel add-ins (like FUNCRES.XLAM)
 '''
 
 Option Explicit
@@ -29,7 +31,7 @@ Public vbaProjectToImport As VBProject
 
 Public Sub testImport()
     Dim proj_name As String
-    proj_name = "VbaDeveloper"
+    proj_name = "VBADeveloper"
 
     Dim vbaProject As Object
     Set vbaProject = Application.VBE.VBProjects(proj_name)
@@ -39,7 +41,7 @@ End Sub
 
 Public Sub testExport()
     Dim proj_name As String
-    proj_name = "VbaDeveloper"
+    proj_name = "VBADeveloper"
 
     Dim vbaProject As Object
     Set vbaProject = Application.VBE.VBProjects(proj_name)
@@ -112,7 +114,13 @@ Public Sub exportVbaCode(vbaProject As VBProject)
     Dim component As VBComponent
     For Each component In vbaProject.VBComponents
         'lblStatus.Caption = "Exporting " & proj_name & "::" & component.Name
-        If hasCodeToExport(component) Then
+        
+        ' Removed condition "If hasCodeToExport".
+        ' Reason: if all the code is removed (deleted) in a component, this file does not export the changes.
+        ' Then, in the next import, the code come back to component because the old file continues at 'src' folder.
+        ' A fix to it could be delete the files at 'src' folder before export, but it is not recommended.
+        ' Modified by Adriano Bortoloto https://github.com/AdrianoBortoloto Sep 16 2015
+        'If hasCodeToExport(component) Then
             'Debug.Print "exporting type is " & component.Type
             Select Case component.Type
                 Case vbext_ct_ClassModule
@@ -126,7 +134,7 @@ Public Sub exportVbaCode(vbaProject As VBProject)
                 Case Else
                     'Raise "Unkown component type"
             End Select
-        End If
+        'End If
     Next component
 End Sub
 
@@ -159,7 +167,15 @@ Private Sub exportLines(exportPath As String, component As VBComponent)
     Dim FSO As New Scripting.FileSystemObject
     Dim outStream As TextStream
     Set outStream = FSO.CreateTextFile(fileName, True, False)
-    outStream.Write (component.codeModule.lines(1, component.codeModule.CountOfLines))
+    
+    ' If file do not have code, do not write in
+    ' But in exportVbaCode() the componente must be exported even if it has no code.
+    ' Thus, all future imports will pull the changes of components which code was full deleted
+    ' avoiding pull old codes deleted before. See the Sub exportVbaCode()
+    ' Modified by Adriano Bortoloto https://github.com/AdrianoBortoloto Sep 16 2015
+    If Not component.codeModule.CountOfLines = 0 Then
+        outStream.Write (component.codeModule.lines(1, component.codeModule.CountOfLines))
+    End If
     outStream.Close
 End Sub
 
