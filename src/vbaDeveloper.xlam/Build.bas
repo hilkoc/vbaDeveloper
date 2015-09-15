@@ -6,7 +6,7 @@ Attribute VB_Name = "Build"
 ' 2. From tools references... add
 '     * Microsoft Visual Basic for Applications Extensibility 5.3
 '     * Microsoft Scripting Runtime
-' 3. Rename the project to 'vbaDeveloper'
+' 3. Rename the project to 'VBADeveloper'
 ' 5. Enable programatic access to VBA:
 '       File -> Options -> Trust Center, Trust Center Settings, -> Macros,
 '       tick the box: 'Enable programatic access to VBA'  (In excel 2010: 'Trust access to the vba project object model')
@@ -114,7 +114,7 @@ Public Sub exportVbaCode(vbaProject As VBProject)
     Dim component As VBComponent
     For Each component In vbaProject.VBComponents
         'lblStatus.Caption = "Exporting " & proj_name & "::" & component.Name
-        
+
         ' Removed condition "If hasCodeToExport".
         ' Reason: if all the code is removed (deleted) in a component, this file does not export the changes.
         ' Then, in the next import, the code come back to component because the old file continues at 'src' folder.
@@ -167,7 +167,7 @@ Private Sub exportLines(exportPath As String, component As VBComponent)
     Dim FSO As New Scripting.FileSystemObject
     Dim outStream As TextStream
     Set outStream = FSO.CreateTextFile(fileName, True, False)
-    
+
     ' If file do not have code, do not write in
     ' But in exportVbaCode() the componente must be exported even if it has no code.
     ' Thus, all future imports will pull the changes of components which code was full deleted
