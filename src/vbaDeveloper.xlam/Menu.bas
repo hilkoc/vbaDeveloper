@@ -39,9 +39,9 @@ Public Sub createMenu()
         caption = projectName & " (" & Dir(project.fileName) & ")" '<- this can throw error
 
         Dim exCommand As String, imCommand As String, formatCommand As String
-        exCommand = "'Menu.exportVbProject """ & projectName & """'"
-        imCommand = "'Menu.importVbProject """ & projectName & """'"
-        formatCommand = "'Menu.formatVbProject """ & projectName & """'"
+        exCommand = "'Menu.exportVbProject """ & project.fileName & """'"
+        imCommand = "'Menu.importVbProject """ & project.fileName & """'"
+        formatCommand = "'Menu.formatVbProject """ & project.fileName & """'"
 
         addMenuItem exSubMenu, exCommand, caption
         addMenuItem imSubMenu, imCommand, caption
@@ -121,11 +121,11 @@ Public Sub refreshMenu()
     menu.createMenu
 End Sub
 
-Public Sub exportVbProject(ByVal projectName As String)
+Public Sub exportVbProject(ByVal projectPath As String)
     On Error GoTo exportVbProject_Error
 
     Dim project As VBProject
-    Set project = Application.VBE.VBProjects(projectName)
+    Set project = GetProjectByPath(projectPath)
     Build.exportVbaCode project
     Dim wb As Workbook
     Set wb = Build.openWorkbook(project.fileName)
@@ -139,11 +139,11 @@ exportVbProject_Error:
 End Sub
 
 
-Public Sub importVbProject(ByVal projectName As String)
+Public Sub importVbProject(ByVal projectPath As String)
     On Error GoTo importVbProject_Error
 
     Dim project As VBProject
-    Set project = Application.VBE.VBProjects(projectName)
+    Set project = GetProjectByPath(projectPath)
     Build.importVbaCode project
     Dim wb As Workbook
     Set wb = Build.openWorkbook(project.fileName)
@@ -157,11 +157,11 @@ importVbProject_Error:
 End Sub
 
 
-Public Sub formatVbProject(ByVal projectName As String)
+Public Sub formatVbProject(ByVal projectPath As String)
     On Error GoTo formatVbProject_Error
 
     Dim project As VBProject
-    Set project = Application.VBE.VBProjects(projectName)
+    Set project = GetProjectByPath(projectPath)
     Formatter.formatProject project
     MsgBox "Finished formatting code for: " & project.name & vbNewLine _
     & vbNewLine _
@@ -250,3 +250,17 @@ Function GetFolder(InitDir As String) As String
     GetFolder = sItem
     Set fldr = Nothing
 End Function
+
+Function GetProjectByPath(ByVal projectPath As String) As VBProject
+    'Simple search to find project by file path
+    Dim project As VBProject
+    For Each project In Application.VBE.VBProjects
+        If UCase(project.fileName) = UCase(projectPath) Then
+            Set GetProjectByPath = project
+            Exit Function
+        End If
+    Next project
+    'If not found return nothing
+    Set GetProjectByPath = Nothing
+End Function
+
