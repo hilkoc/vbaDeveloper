@@ -122,7 +122,7 @@ Public Sub rebuildXML(destinationFolder As String, containingFolderName As Strin
 
     'Set what some items should be named
     Dim fileExtension As String, strDate As String, fileShortName As String, fileName As String, zipFileName As String
-    strDate = VBA.format(Now, " yyyy-mm-dd hh-mm-ss")
+    strDate = VBA.Format(Now, " yyyy-mm-dd hh-mm-ss")
     fileExtension = "." & Right(containingFolderName, Len(containingFolderName) - InStrRev(containingFolderName, "."))  'The containing folder is the folder that is under \src and that is named the same thing as the target file (folder is filename.xlsx) - can parse file ending out of folder
     fileShortName = Right(containingFolderName, Len(containingFolderName) - InStrRev(containingFolderName, "\"))        'This should be just the final folder name
     fileShortName = Left(fileShortName, Len(fileShortName) - (Len(fileShortName) - InStr(fileShortName, ".")) - 1)                            'remove the extension, since we've saved that separately.

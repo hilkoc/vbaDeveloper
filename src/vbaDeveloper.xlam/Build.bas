@@ -21,7 +21,6 @@ Attribute VB_Name = "Build"
 
 Option Explicit
 
-
 Private Const IMPORT_DELAY As String = "00:00:03"
 
 'We need to make these variables public such that they can be given as arguments to application.ontime()
@@ -35,7 +34,7 @@ Public Sub testImport()
 
     Dim vbaProject As Object
     Set vbaProject = Application.VBE.VBProjects(proj_name)
-    Build.importVbaCode vbaProject
+    Build.importVbaCode vbaProject, True
 End Sub
 
 
@@ -122,7 +121,7 @@ Public Sub exportVbaCode(vbaProject As VBProject)
                 Case vbext_ct_StdModule
                     exportComponent export_path, component, ".bas"
                 Case vbext_ct_MSForm
-                    exportComponent export_path, component, ".frm"
+                    BuildForm.exportMSForm export_path, component
                 Case vbext_ct_Document
                     exportLines export_path, component
                 Case Else
@@ -293,8 +292,12 @@ End Sub
 ' Assumes any component with same name has already been removed.
 Private Sub importComponent(vbaProject As VBProject, filePath As String)
     Debug.Print "Importing component from  " & filePath
-    'This next line is a bug! It imports all classes as modules!
     vbaProject.VBComponents.Import filePath
+    Dim newComp As VBComponent
+    Set newComp = vbaProject.VBComponents.Import(filePath)
+    Do While Trim(newComp.codeModule.lines(1, 1)) = "" And newComp.codeModule.CountOfLines > 1
+        newComp.codeModule.DeleteLines 1
+    Loop
 End Sub
 
 

@@ -189,7 +189,7 @@ Public Sub formatProject(vbaProject As VBProject)
     Next
 End Sub
 
-Public Sub format()
+Public Sub Format()
     formatCode Application.VBE.ActiveCodePane.codeModule
 End Sub
 
