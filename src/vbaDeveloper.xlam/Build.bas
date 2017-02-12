@@ -166,9 +166,9 @@ Private Sub exportLines(exportPath As String, component As VBComponent)
 End Sub
 
 
-' Usually called after the given workbook is opened. The option includeClassFiles is False by default because
-' they don't import correctly from VBA. They'll have to be imported manually instead.
-Public Sub importVbaCode(vbaProject As VBProject, Optional includeClassFiles As Boolean = False)
+' Usually called after the given workbook is opened.
+' The option includeClassFiles is True by default providing that git repo is correctly handling line endings as crlf (Windows-style) instead of lf (Unix-style)
+Public Sub importVbaCode(vbaProject As VBProject, Optional includeClassFiles As Boolean = True)
     Dim vbProjectFileName As String
     On Error Resume Next
     'this can throw if the workbook has never been saved.
