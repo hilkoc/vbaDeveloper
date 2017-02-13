@@ -292,7 +292,6 @@ End Sub
 ' Assumes any component with same name has already been removed.
 Private Sub importComponent(vbaProject As VBProject, filePath As String)
     Debug.Print "Importing component from  " & filePath
-    vbaProject.VBComponents.Import filePath
     Dim newComp As VBComponent
     Set newComp = vbaProject.VBComponents.Import(filePath)
     Do While Trim(newComp.codeModule.lines(1, 1)) = "" And newComp.codeModule.CountOfLines > 1
