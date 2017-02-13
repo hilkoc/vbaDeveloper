@@ -58,6 +58,7 @@ Private Sub App_WorkbookOpen(ByVal wb As Workbook)
         NamedRanges.importNamedRanges wb
     End If
 
+
     Exit Sub
 App_WorkbookOpen_Error:
     ErrorHandling.handleError "vbaDeveloper.EventListener WorkbookOpen"
