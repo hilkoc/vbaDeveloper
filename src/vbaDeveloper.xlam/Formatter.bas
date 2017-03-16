@@ -261,7 +261,8 @@ Private Function indentChange(ByVal line As String) As Integer
     Set w = vbaWords
 
     If isEqual(line, ONEWORD_END_FOR) Or _
-        isEqual(line, ONEWORD_END_LOOP) Then
+        isEqual(line, ONEWORD_END_LOOP) Or _
+        lineStartsWith(ONEWORD_END_LOOP, line) Then
         indentChange = -1
         GoTo hell
     End If
