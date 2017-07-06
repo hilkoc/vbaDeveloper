@@ -62,7 +62,7 @@ Private Const BEG_END_ELSEIF = "ElseIf"
 Private Const BEG_END_CASE = "Case "
 
 Private Const THEN_KEYWORD = "Then"
-Private Const LINE_CONTINUATION = "_"
+Private Const LINE_CONTINUATION = " _"
 
 Private Const INDENT = "    "
 
@@ -199,8 +199,9 @@ Public Sub formatCode(codePane As codeModule)
     Dim lineCount As Integer
     lineCount = codePane.CountOfLines
 
-    Dim indentLevel As Integer, nextLevel As Integer, levelChange As Integer
+    Dim indentLevel As Integer, nextLevel As Integer, levelChange As Integer, isPrevLineContinuated as Boolean
     indentLevel = 0
+    isPrevLineContinuated = False
     Dim lineNr As Integer
     For lineNr = 1 To lineCount
         Dim line As String
@@ -231,7 +232,10 @@ Public Sub formatCode(codePane As codeModule)
             line = indentation(indentLevel) + line
             indentLevel = nextLevel
         End If
-        Call codePane.ReplaceLine(lineNr, line)
+        If Not isPrevLineContinuated Then
+            Call codePane.ReplaceLine(lineNr, line)
+        EndIf
+        isPrevLineContinuated = isLineContinuated(line)
     Next
     Exit Sub
 formatCodeError:
@@ -261,7 +265,7 @@ Private Function indentChange(ByVal line As String) As Integer
     Set w = vbaWords
 
     If isEqual(line, ONEWORD_END_FOR) Or _
-        isEqual(line, ONEWORD_END_LOOP) Then
+        lineStartsWith(ONEWORD_END_LOOP, line) Then
         indentChange = -1
         GoTo hell
     End If
@@ -318,6 +322,13 @@ Private Function isOneLineIfStatemt(line As String) As Boolean
     Dim trimmedLine As String
     trimmedLine = TrimComments(line)
     isOneLineIfStatemt = (lineStartsWith(BEG_IF, trimmedLine) And (Not lineEndsWith(THEN_KEYWORD, trimmedLine)) And Not lineEndsWith(LINE_CONTINUATION, trimmedLine))
+End Function
+
+
+Private Function isLineContinuated(line As String) As Boolean
+    Dim trimmedLine As String
+    trimmedLine = TrimComments(line)
+    isLineContinuated = lineEndsWith(LINE_CONTINUATION, trimmedLine)
 End Function
 
 

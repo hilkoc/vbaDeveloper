@@ -7,11 +7,14 @@ Attribute VB_Name = "Build"
 '     * Microsoft Visual Basic for Applications Extensibility 5.3
 '     * Microsoft Scripting Runtime
 ' 3. Rename the project to 'vbaDeveloper'
-' 5. Enable programatic access to VBA:
+' 4. Enable programatic access to VBA:
 '       File -> Options -> Trust Center, Trust Center Settings, -> Macros,
 '       tick the box: 'Enable programatic access to VBA'  (In excel 2010: 'Trust access to the vba project object model')
 '       If you get 'path not found' exception in Excel 2013, include the following step:
-'           In 'Trust Center' settings, go to 'File Block Settings' and check 'open' and/or 'save' for 'Excel 2007 and later Macro-Enabled Workbooks and Templates'.
+'           In 'Trust Center' settings, go to 'File Block Settings' and check 'open' and/or 'save' 
+'           for 'Excel 2007 and later Macro-Enabled Workbooks and Templates'.
+' 5. If using a non-English version of Excel, rename your current workbook into ThisWorkbook (in VB Editor, press F4,
+'    then under the local name for Microsoft Excel Objects, select the workbook. Set the property '(Name)' to ThisWorkbook)
 ' 6. In VB Editor, press F4, then under Microsoft Excel Objects, select ThisWorkbook.Set the property 'IsAddin' to TRUE
 ' 7. In VB Editor, menu File-->Save Book1; Save as vbaDeveloper.xlam in the same directory as 'src'
 ' 8. Close excel. Open excel with a new workbook, then open the just saved vbaDeveloper.xlam
