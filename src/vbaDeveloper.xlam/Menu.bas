@@ -132,7 +132,6 @@ Public Sub exportVbProject(ByVal projectPath As String)
     NamedRanges.exportNamedRanges wb
     MsgBox "Finished exporting code for: " & project.name
 
-    On Error GoTo 0
     Exit Sub
 exportVbProject_Error:
     ErrorHandling.handleError "Menu.exportVbProject"
@@ -251,16 +250,21 @@ Function GetFolder(InitDir As String) As String
     Set fldr = Nothing
 End Function
 
+
 Function GetProjectByPath(ByVal projectPath As String) As VBProject
     'Simple search to find project by file path
     Dim project As VBProject
     For Each project In Application.VBE.VBProjects
+        On Error GoTo skipone
         If UCase(project.fileName) = UCase(projectPath) Then
             Set GetProjectByPath = project
             Exit Function
         End If
+nextprj:
     Next project
     'If not found return nothing
-    Set GetProjectByPath = Nothing
+    Exit Function
+skipone:
+    Resume nextprj
 End Function
 
