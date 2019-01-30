@@ -10,16 +10,27 @@ Attribute VB_Name = "Build"
 ' 4. Enable programatic access to VBA:
 '       File -> Options -> Trust Center, Trust Center Settings, -> Macros,
 '       tick the box: 'Enable programatic access to VBA'  (In excel 2010: 'Trust access to the vba project object model')
+'       If you policy seetings don't allow to change this option you can create the following registry key:
+'           [HKEY_CURRENT_USER\Software\Policies\Microsoft\office\{Excel-Version}\excel\security]
+'           "accessvbom"=dword:00000001
 '       If you get 'path not found' exception in Excel 2013, include the following step:
-'           In 'Trust Center' settings, go to 'File Block Settings' and check 'open' and/or 'save' 
+'           In 'Trust Center' settings, go to 'File Block Settings' and un-check 'open' and/or 'save' 
 '           for 'Excel 2007 and later Macro-Enabled Workbooks and Templates'.
 ' 5. If using a non-English version of Excel, rename your current workbook into ThisWorkbook (in VB Editor, press F4,
 '    then under the local name for Microsoft Excel Objects, select the workbook. Set the property '(Name)' to ThisWorkbook)
-' 6. In VB Editor, press F4, then under Microsoft Excel Objects, select ThisWorkbook.Set the property 'IsAddin' to TRUE
+' 6. In VB Editor, press F4, then under Microsoft Excel Objects, select ThisWorkbook in vbaDeveloper. Set the property 'IsAddin' to TRUE
 ' 7. In VB Editor, menu File-->Save Book1; Save as vbaDeveloper.xlam in the same directory as 'src'
 ' 8. Close excel. Open excel with a new workbook, then open the just saved vbaDeveloper.xlam
 ' 9. Let vbaDeveloper import its own code. Put the cursor in the function 'testImport' and press F5
-' 10.If necessary rename module 'Build1' to Build. Menu File-->Save vbaDeveloper.xlam
+' 10.Right click on 'vbaDeveloper', Import File for:
+'     * CustomActions.cls
+'     * EventListener.cls
+'     * MyCustomActions.cls
+' 11.Read the instructions in ThisWorkbook in vbaDeveloper Project and uncomment the code if you want automatic import and export enabled
+' 12.If necessary rename module 'Build1' to Build. Menu File-->Save vbaDeveloper.xlam
+' 13.Open the Excel workbook where you want to use vbaDeveloper and add vbaDeveloper.xlam as reference to load the Add-In with the workbook:
+'       In VB Editor -> Tools -> References -> Browse and select vbaDeveloper.xlam
+'       Save the workbook, close it and reopen the workbook, now in the menu ribbon the ADD-INS tab is available with the VbaDeveloper menu
 '''
 
 Option Explicit
