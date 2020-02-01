@@ -1,6 +1,7 @@
 Attribute VB_Name = "Formatter"
 Option Explicit
 
+Private Const SIMPLIFIED_FORMAT = False
 Private Const BEG_SUB = "Sub "
 Private Const END_SUB = "End Sub"
 Private Const BEG_PB_SUB = "Public Sub "
@@ -199,43 +200,48 @@ Public Sub formatCode(codePane As codeModule)
     Dim lineCount As Integer
     lineCount = codePane.CountOfLines
 
-    Dim indentLevel As Integer, nextLevel As Integer, levelChange As Integer, isPrevLineContinuated as Boolean
+    Dim indentLevel As Integer, nextLevel As Integer, levelChange As Integer, isPrevLineContinuated As Boolean
     indentLevel = 0
     isPrevLineContinuated = False
     Dim lineNr As Integer
     For lineNr = 1 To lineCount
         Dim line As String
-        line = Trim(codePane.lines(lineNr, 1))
-        If Not line = "" Then
-            If isEqual(ONEWORD_ELSE, line) _
-                Or lineStartsWith(BEG_END_ELSEIF, line) _
-                Or lineStartsWith(BEG_END_CASE, line) Then
-                ' Case, Else, ElseIf need to jump to the left
-                levelChange = 1
-                indentLevel = -1 + indentLevel
-            ElseIf isLabel(line) Then
-                ' Labels don't have indentation
-                levelChange = indentLevel
-                indentLevel = 0
-                ' check for oneline If statemts
-            ElseIf isOneLineIfStatemt(line) Then
-                levelChange = 0
-            Else
-                levelChange = indentChange(line)
-            End If
-
-            nextLevel = indentLevel + levelChange
-            If levelChange <= -1 Then
+        If SIMPLIFIED_FORMAT Then
+            line = RTrim(codePane.lines(lineNr, 1))
+            Call codePane.ReplaceLine(lineNr, line)
+        Else
+            line = Trim(codePane.lines(lineNr, 1))
+            If Not line = "" Then
+                If isEqual(ONEWORD_ELSE, line) _
+                    Or lineStartsWith(BEG_END_ELSEIF, line) _
+                    Or lineStartsWith(BEG_END_CASE, line) Then
+                    ' Case, Else, ElseIf need to jump to the left
+                    levelChange = 1
+                    indentLevel = -1 + indentLevel
+                ElseIf isLabel(line) Then
+                    ' Labels don't have indentation
+                    levelChange = indentLevel
+                    indentLevel = 0
+                    ' check for oneline If statemts
+                ElseIf isOneLineIfStatemt(line) Then
+                    levelChange = 0
+                Else
+                    levelChange = indentChange(line)
+                End If
+    
+                nextLevel = indentLevel + levelChange
+                If levelChange <= -1 Then
+                    indentLevel = nextLevel
+                End If
+    
+                line = indentation(indentLevel) + line
                 indentLevel = nextLevel
             End If
-
-            line = indentation(indentLevel) + line
-            indentLevel = nextLevel
+            If Not isPrevLineContinuated Then
+                Call codePane.ReplaceLine(lineNr, line)
+            EndIf
+            isPrevLineContinuated = isLineContinuated(line)
         End If
-        If Not isPrevLineContinuated Then
-            Call codePane.ReplaceLine(lineNr, line)
-        EndIf
-        isPrevLineContinuated = isLineContinuated(line)
     Next
     Exit Sub
 formatCodeError:

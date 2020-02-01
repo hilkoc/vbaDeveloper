@@ -22,13 +22,15 @@ Attribute VB_Name = "Build"
 ' 7. In VB Editor, menu File-->Save Book1; Save as vbaDeveloper.xlam in the same directory as 'src'
 ' 8. Close excel. Open excel with a new workbook, then open the just saved vbaDeveloper.xlam
 ' 9. Let vbaDeveloper import its own code. Put the cursor in the function 'testImport' and press F5
-' 10.Right click on 'vbaDeveloper', Import File for:
+' 10. To reduce default devDeveloper code formatting to just trailing spaces trimming, go to the module Formatter and replace
+'     "SIMPLIFIED_FORMAT = False" with "SIMPLIFIED_FORMAT = True"
+' 11.Right click on 'vbaDeveloper', Import File for:
 '     * CustomActions.cls
 '     * EventListener.cls
 '     * MyCustomActions.cls
-' 11.Read the instructions in ThisWorkbook in vbaDeveloper Project and uncomment the code if you want automatic import and export enabled
-' 12.If necessary rename module 'Build1' to Build. Menu File-->Save vbaDeveloper.xlam
-' 13.Open the Excel workbook where you want to use vbaDeveloper and add vbaDeveloper.xlam as reference to load the Add-In with the workbook:
+' 12.Read the instructions in ThisWorkbook in vbaDeveloper Project and uncomment the code if you want automatic import and export enabled
+' 13.If necessary rename module 'Build1' to Build. Menu File-->Save vbaDeveloper.xlam
+' 14.Open the Excel workbook where you want to use vbaDeveloper and add vbaDeveloper.xlam as reference to load the Add-In with the workbook:
 '       In VB Editor -> Tools -> References -> Browse and select vbaDeveloper.xlam
 '       Save the workbook, close it and reopen the workbook, now in the menu ribbon the ADD-INS tab is available with the VbaDeveloper menu
 '''
