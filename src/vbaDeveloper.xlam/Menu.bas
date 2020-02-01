@@ -164,7 +164,7 @@ Public Sub formatVbProject(ByVal projectPath As String)
     Formatter.formatProject project
     MsgBox "Finished formatting code for: " & project.name & vbNewLine _
     & vbNewLine _
-    & "Did you know you can also format your code, while writing it, by typing 'application.Run ""format""' in the immediate window?"
+    & "Did you know you can also format your code, while writing it, by typing 'application.Run ""formatActiveCodePane""' in the immediate window?"
 
     On Error GoTo 0
     Exit Sub
