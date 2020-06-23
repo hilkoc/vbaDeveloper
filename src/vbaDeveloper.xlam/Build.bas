@@ -147,13 +147,30 @@ Public Sub exportVbaCode(vbaProject As VBProject)
 End Sub
 
 
+Private Function codeModuleExists(component As VBComponent) As Boolean
+    On Error GoTo doesnt
+    Dim tempObj
+    Set tempObj = component.codeModule
+    codeModuleExists = True
+    Exit Function
+doesnt:
+    On Error GoTo -1
+    Err.Clear
+    codeModuleExists = False
+    Exit Function
+End Function
+
+
 Private Function hasCodeToExport(component As VBComponent) As Boolean
     hasCodeToExport = True
-    If component.codeModule.CountOfLines <= 2 Then
-        Dim firstLine As String
-        firstLine = Trim(component.codeModule.lines(1, 1))
-        'Debug.Print firstLine
-        hasCodeToExport = Not (firstLine = "" Or firstLine = "Option Explicit")
+    If codeModuleExists(component) Then
+        If component.codeModule.CountOfLines <= 2 Then
+            Dim firstLine As String
+            firstLine = Trim(component.codeModule.lines(1, 1))
+            'Debug.Print firstLine
+            hasCodeToExport = Not (firstLine = "" Or firstLine = "Option Explicit")
+    Else
+        hasCodeToExport = False
     End If
 End Function
 
