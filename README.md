@@ -11,7 +11,7 @@ Whenever you save your vba project the addin will *automatically* export all you
 
 VbaDeveloper can also import the code again into your excel workbook. This is particularly useful after reverting an earlier commit or after merging branches. Whenever you open an excel workbook it will ask if you want to import the code for that project.
 
-A code formatter for VBA is also included. It is implemented in VBA and can be directly run as a macro within the VBA Editor, so you can format your code as you write it. The most convenient way to run it is by opening the immediate window and then typing ' application.run "format" '. This will format the active codepane.
+A code formatter for VBA is also included. It is implemented in VBA and can be directly run as a macro within the VBA Editor, so you can format your code as you write it. The most convenient way to run it is by opening the immediate window and then typing ' application.run "formatActiveCodePane" '. This will format the active codepane.
 
 Besides the vba code, the addin also imports and exports any named ranges. This makes it easy to track in your commit history how those have changed or you can use this feature to easily transport them from one workbook to another.
 
