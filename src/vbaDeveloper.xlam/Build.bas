@@ -6,7 +6,8 @@ Attribute VB_Name = "Build"
 ' 2. From tools references... add
 '     * Microsoft Visual Basic for Applications Extensibility 5.3
 '     * Microsoft Scripting Runtime
-' 3. Rename the project to 'vbaDeveloper'
+' 3. Rename the project to 'vbaDeveloper' (in Project Explorer (Ctrl+R to show) select current project and click F4 
+'    to open Properties window. Then set property '(Name)' to 'vbaDeveloper')
 ' 4. Enable programatic access to VBA:
 '       File -> Options -> Trust Center, Trust Center Settings, -> Macros,
 '       tick the box: 'Enable programatic access to VBA'  (In excel 2010: 'Trust access to the vba project object model')
@@ -16,12 +17,13 @@ Attribute VB_Name = "Build"
 '       If you get 'path not found' exception in Excel 2013, include the following step:
 '           In 'Trust Center' settings, go to 'File Block Settings' and un-check 'open' and/or 'save' 
 '           for 'Excel 2007 and later Macro-Enabled Workbooks and Templates'.
-' 5. If using a non-English version of Excel, rename your current workbook into ThisWorkbook (in VB Editor, press F4,
-'    then under the local name for Microsoft Excel Objects, select the workbook. Set the property '(Name)' to ThisWorkbook)
+' 5. If using a non-English version of Excel, rename your current workbook into ThisWorkbook (in VB Editor, press Ctrl+R,
+'    then in the Project Explorer (under the local folder name for Microsoft Excel Objects) select the workbook. Set the 
+'    property (F4 to show Properties window) '(Name)' to ThisWorkbook).
 ' 6. In VB Editor, press F4, then under Microsoft Excel Objects, select ThisWorkbook in vbaDeveloper. Set the property 'IsAddin' to TRUE
-' 7. In VB Editor, menu File-->Save Book1; Save as vbaDeveloper.xlam in the same directory as 'src'
+' 7. In VB Editor, menu File-->Save Book1; Save as vbaDeveloper.xlam in the same directory as 'src' and the 'README.md' file
 ' 8. Close excel. Open excel with a new workbook, then open the just saved vbaDeveloper.xlam
-' 9. Let vbaDeveloper import its own code. Put the cursor in the function 'testImport' and press F5
+' 9. Let vbaDeveloper import its own code: Put the cursor in the function 'testImport' and press F5
 ' 10.Right click on 'vbaDeveloper', Import File for:
 '     * CustomActions.cls
 '     * EventListener.cls
